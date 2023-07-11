@@ -27,7 +27,6 @@ export interface Users {
   created_at?: Date;
   users_workgroups?: UsersWorkgroups[];
   workgroups?: Workgroups[];
-  verified?: boolean;
 }
 
 export interface UsersWorkgroups {
