@@ -41,7 +41,6 @@ export async function sendResetPasswordEmail(email: string, token: string): Prom
         });
         return {success: true};
     } catch (error) {
-        console.log(error);
-        return {success: false};
+      return {success: false};
     }
 }
