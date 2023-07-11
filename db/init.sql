@@ -26,7 +26,6 @@ CREATE TABLE IF NOT EXISTS "users" (
   password VARCHAR(255) NOT NULL,
   image_url VARCHAR(255),
   created_at TIMESTAMP DEFAULT current_timestamp,
-  verified BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 -- Create the workgroups table

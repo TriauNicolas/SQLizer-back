@@ -4,6 +4,7 @@ import PasswordException from '../exceptions/password.exceptions';
 import { Users } from '../models/models';
 import { z } from 'zod';
 import { sign, verify } from 'jsonwebtoken';
+import { sendResetPasswordEmail } from '../core/nodemailer';
 
 // const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
@@ -72,7 +73,10 @@ export const forgetPassword = async (req: Request, res: Response) => {
         if (!user) throw new Error('Invalid Email');
 
         const token = sign({id: user.id, reason: 'forgetPassword'}, process.env.JWT_KEY, { expiresIn: '1h' });
-        //todo send token via email
+
+        const response = await sendResetPasswordEmail(user.email, token);
+        if (!response.success) throw new Error('An error has occured');
+
         res.json({success: true, message: 'An email has been sent. It will expire in 1 hour', token});
     } catch (error) {
         res.status(400).json({ error: error.message });
