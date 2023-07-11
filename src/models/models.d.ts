@@ -47,4 +47,5 @@ export interface Workgroups {
   databases_groups: DatabasesGroups[];
   users_workgroups: UsersWorkgroups[];
   users: Users;
+  private: boolean;
 }

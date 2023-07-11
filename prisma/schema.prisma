@@ -54,6 +54,7 @@ model workgroups {
   group_name       String             @db.VarChar(255)
   created_at       DateTime?          @default(now()) @db.Timestamp(6)
   creator_id       String             @db.Uuid
+  private          Boolean            @default(false)
   databases_groups databases_groups[]
   users_workgroups users_workgroups[]
   users            users              @relation(fields: [creator_id], references: [id], onDelete: NoAction, onUpdate: NoAction)

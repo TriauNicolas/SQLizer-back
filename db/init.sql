@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS "workgroups" (
   group_name VARCHAR(255) NOT NULL,
   created_at TIMESTAMP DEFAULT current_timestamp,
   creator_id UUID NOT NULL,
+  private BOOLEAN NOT NULL DEFAULT FALSE,
   FOREIGN KEY (creator_id) REFERENCES users(id)
 );
 

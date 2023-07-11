@@ -37,7 +37,7 @@ export const registerController = async (req: Request, res: Response) => {
     });
     try {
         const user = validation.parse(req.body);
-        await prisma.users.create({
+        const prismaUser = await prisma.users.create({
             data: {
                 first_name: user.first_name,
                 last_name: user.first_name,
@@ -45,6 +45,26 @@ export const registerController = async (req: Request, res: Response) => {
                 password: await PasswordException.hashPassword(user.password)
             }
         });
+
+
+        const prismaWorkgroup = await prisma.workgroups.create({
+            data: {
+                group_name: 'Mes Projets',
+                creator_id: prismaUser.id,
+                private: true
+            }
+        });
+
+        await prisma.users_workgroups.create({
+            data: {
+                user_id: prismaUser.id,
+                group_id: prismaWorkgroup.id,
+                create_right: true,
+                update_right: true,
+                delete_right: false
+            }
+        });
+
         res.json({success: true});
     } catch (error) {
         res.status(400).json({ error: error.message });
