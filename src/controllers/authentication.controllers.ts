@@ -13,6 +13,18 @@ async function verifyToken(token): Promise<any> {
     return await verify(token, process.env.JWT_KEY);
 }
 
+export async function getUserFromToken(token: string): Promise <Users> {
+    const id = (await verifyToken(token))?.id;
+
+    if (!id) throw new Error('Invalid Token');
+
+    const user: Users = await prisma.users.findUnique({ where: { id } });
+
+    if (!user) throw new Error('User not valid');
+
+    return user;
+}
+
 export const registerController = async (req: Request, res: Response) => {
 
     const validation = z.object({
