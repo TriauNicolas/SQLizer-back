@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "db:start": "docker-compose up -d",
-    "db:stop": "docker-compose down",
+    "db:stop": "docker-compose down && rmdir ./data",
     "watch": "npx prisma db pull && npx prisma generate && nodemon --watch src ./src/index.ts --exec ts-node ./src/index.ts -L",
     "linter": "npx eslint .",
     "prisma:pull": "prisma db pull"

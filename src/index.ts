@@ -3,6 +3,7 @@ import cors from 'cors';
 
 import { config } from 'dotenv';
 import { AuthenticationRoute } from './routes/authentication.routes';
+import { WorkgroupsRoute } from './routes/workgroups.routes';
 
 config();
 const app = express();
@@ -20,6 +21,7 @@ app.use((req, res, next)=>
   next();
 });
 
+app.use('/workgroups', WorkgroupsRoute);
 app.use('/auth', AuthenticationRoute);
 
 
