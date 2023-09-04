@@ -9,20 +9,43 @@ import { sendResetPasswordEmail } from '../core/nodemailer';
 // const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function verifyToken(token): Promise<any> {
+async function verifyToken(token): Promise <any> {
     return await verify(token, process.env.JWT_KEY);
 }
 
+export const extractBearerToken = (req: Request) => {
+    const bearerHeader = req.headers['authorization'];
+    if (typeof bearerHeader !== 'undefined') {
+        const bearer = bearerHeader.split(' ');
+        return bearer[1].toString();
+    } else {
+        throw new Error('Invalid Token');
+    }
+};
+
 export async function getUserFromToken(token: string): Promise <Users> {
-    const id = (await verifyToken(token))?.id;
+    try {
+        const id = (await verifyToken(token))?.id;
 
-    if (!id) throw new Error('Invalid Token');
+        if (!id) throw new Error('Invalid Token');
 
-    const user: Users = await prisma.users.findUnique({ where: { id } });
+        const user: Users = await prisma.users.findUnique({ where: { id } });
 
-    if (!user) throw new Error('User not valid');
+        if (!user) throw new Error('User not valid');
 
-    return user;
+        return user;
+    } catch (error) {
+        throw new Error(JSON.stringify(error));
+    }
+}
+
+export async function getUserFromRequest(req: Request): Promise <Users> {
+    try {
+        const token = extractBearerToken(req);
+        return getUserFromToken(token.toString());
+    } catch (error) {
+        throw new Error(JSON.stringify(error));
+    }
 }
 
 export const registerController = async (req: Request, res: Response) => {
