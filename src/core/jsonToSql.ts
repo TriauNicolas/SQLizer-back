@@ -1,83 +1,54 @@
-type TableField = {
-  name: string;
-  type: string;
-  primary_key?: boolean;
-  foreign_key?: { references: string };
-};
+export default function translateJSONtoSQL(jsonData) {
+  const sqlCommands = [];
 
-type TableRelation = {
-  type: string;
-  with: string;
-  field: string;
-  junction_table?: string;
-};
+  // Start with creating the database
+  sqlCommands.push(`CREATE DATABASE ${jsonData.dbName};`);
+  sqlCommands.push(`USE ${jsonData.dbName};`);
 
-type Table = {
-  name: string;
-  fields: TableField[];
-  relations?: TableRelation[];
-  junctionTable?: boolean;
-};
+  // Create the tables
+  jsonData.tables.forEach((table) => {
+    let command = `CREATE TABLE ${table.name} (`;
+    const primaryKeys = [];
 
-type JSONSchema = {
-  tables: Table[];
-};
+    table.fields.forEach((field, index) => {
+      command += `${field.name} ${field.type}`;
 
-export default function transformJSONtoSQL(jsonData: JSONSchema): string {
-  const createTableStatements = [];
-  const alterTableStatements = [];
-
-  // Create SQL tables
-  for (const table of jsonData.tables) {
-    const createTableSQL = `CREATE TABLE IF NOT EXISTS ${table.name} (`;
-    const fields = table.fields.map((field) => {
-      let fieldSQL = `${field.name} ${field.type}`;
-      if (field.primary_key) {
-        fieldSQL += " PRIMARY KEY";
+      if (field.autoIncrement) {
+        command += " AUTO_INCREMENT";
       }
-      if (field.foreign_key) {
-        fieldSQL += ` REFERENCES ${field.foreign_key.references}`;
+      if (!field.nullable) {
+        command += " NOT NULL";
       }
-      return fieldSQL;
+      if (field.pk) {
+        primaryKeys.push(field.name);
+      }
+
+      // Add comma for next field, unless it's the last one
+      if (index < table.fields.length - 1) {
+        command += ", ";
+      }
     });
-    const tableSQL = `${createTableSQL} ${fields.join(", ")});`;
-    createTableStatements.push(tableSQL);
 
-    // Create foreign key constraints for relationships
-    if (table.relations) {
-      for (const relation of table.relations) {
-        if (relation.type === "one-to-many" || relation.type === "one-to-one") {
-          const fromField = relation.field;
-          const toTable = relation.with;
-          const toField = jsonData.tables.find((t) => t.name === toTable)
-            ?.fields[0]?.name;
-          if (toField) {
-            const foreignKeySQL = `ALTER TABLE ${table.name} ADD CONSTRAINT fk_${table.name}_${toTable}_${fromField} FOREIGN KEY (${fromField}) REFERENCES ${toTable}(${toField}) ON DELETE CASCADE;`;
-            alterTableStatements.push(foreignKeySQL);
-          }
-        } else if (relation.type === "many-to-many") {
-          const junctionTable = jsonData.tables.find(
-            (t) => t.name === relation.junction_table
-          );
-          if (junctionTable) {
-            const fromField = table.name.toLowerCase() + "_id";
-            const toField = relation.with.toLowerCase() + "_id";
-            const foreignKeyFromSQL = `ALTER TABLE ${junctionTable.name} ADD CONSTRAINT fk_${junctionTable.name}_${table.name}_${fromField} FOREIGN KEY (${fromField}) REFERENCES ${table.name}(${table.fields[0]?.name}) ON DELETE CASCADE;`;
-            const foreignKeyToSQL = `ALTER TABLE ${
-              junctionTable.name
-            } ADD CONSTRAINT fk_${junctionTable.name}_${
-              relation.with
-            }_${toField} FOREIGN KEY (${toField}) REFERENCES ${relation.with}(${
-              jsonData.tables.find((t) => t.name === relation.with)?.fields[0]
-                ?.name
-            }) ON DELETE CASCADE;`;
-            alterTableStatements.push(foreignKeyFromSQL);
-            alterTableStatements.push(foreignKeyToSQL);
-          }
-        }
-      }
+    // Handle composite primary keys
+    if (primaryKeys.length > 0) {
+      command += `, PRIMARY KEY (${primaryKeys.join(", ")})`;
     }
-  }
 
-  return `${createTableStatements.join(" ")} ${alterTableStatements.join(" ")}`;
+    command += ");";
+    sqlCommands.push(command);
+  });
+
+  // Add relations (foreign keys)
+  jsonData.relations.forEach((relation) => {
+    const fkField = relation.from.field;
+    const pkTable = relation.to.table;
+    const pkField = relation.to.field;
+    const fkTable = relation.from.table;
+
+    const command = `ALTER TABLE ${fkTable} ADD FOREIGN KEY (${fkField}) REFERENCES ${pkTable}(${pkField});`;
+    sqlCommands.push(command);
+  });
+
+  console.log(sqlCommands.join("\n"));
+  return sqlCommands.join("");
 }
