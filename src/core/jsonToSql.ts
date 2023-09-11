@@ -40,10 +40,10 @@ export default function translateJSONtoSQL(jsonData) {
 
   // Add relations (foreign keys)
   jsonData.relations.forEach((relation) => {
+    const fkTable = relation.from.table;
     const fkField = relation.from.field;
     const pkTable = relation.to.table;
     const pkField = relation.to.field;
-    const fkTable = relation.from.table;
 
     const command = `ALTER TABLE ${fkTable} ADD FOREIGN KEY (${fkField}) REFERENCES ${pkTable}(${pkField});`;
     sqlCommands.push(command);
