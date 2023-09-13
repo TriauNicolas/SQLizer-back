@@ -162,3 +162,12 @@ export const resetPassword = async (req: Request, res: Response) => {
         res.status(400).json({ error: error.message });
     }
 };
+
+export const verifTokenController = async (req: Request, res: Response) => {
+    try {
+        await verifyToken(extractBearerToken(req));
+        res.json({success: true});
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
