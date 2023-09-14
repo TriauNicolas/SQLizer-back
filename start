@@ -6,7 +6,5 @@ chmod -R a+rwx ./node_modules/
 chmod -R a+rwx ./prisma/
 chmod -R a+rwx ./postgres_data/
 apt-get update -y && apt-get install -y openssl
-npx prisma migrate dev
-npx prisma generate
 
 npm run watch
