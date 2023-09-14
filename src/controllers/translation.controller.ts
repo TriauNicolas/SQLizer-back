@@ -291,24 +291,21 @@ export function containsKeywords(
 ): string[] {
   const forbiddenWords: string[] = [];
 
-  const checkKeywords = (text: string, textType: string) => {
+  const checkKeywords = (text: string) => {
     keywords.forEach((keyword) => {
       if (text.toUpperCase() === keyword) {
         forbiddenWords.push(keyword);
-        console.log(
-          `Forbidden word "${keyword}" found in ${textType}: ${text}`
-        );
       }
     });
   };
 
-  checkKeywords(database.dbName, "database name");
+  checkKeywords(database.dbName);
 
   database.tables.forEach((table) => {
-    checkKeywords(table.name, "table name");
+    checkKeywords(table.name);
 
     table.fields.forEach((field) => {
-      checkKeywords(field.name, "field name");
+      checkKeywords(field.name);
     });
   });
 
