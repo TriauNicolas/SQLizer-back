@@ -272,7 +272,6 @@ export const transformJSONtoSQLController = async (
 ) => {
   try {
     const keywords = containsKeywords(req.body, reservedKeywords);
-    console.log(keywords);
     if (keywords.length > 0) {
       return res.status(400).json({
         error: `Request contains MySQL reserved words : ${keywords.toString()}`,

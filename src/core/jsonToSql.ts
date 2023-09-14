@@ -49,6 +49,5 @@ export default function translateJSONtoSQL(jsonData) {
     sqlCommands.push(command);
   });
 
-  console.log(sqlCommands.join("\n"));
   return sqlCommands.join("");
 }
