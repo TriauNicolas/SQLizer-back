@@ -49,3 +49,39 @@ export interface Workgroups {
   users: Users;
   private: boolean;
 }
+
+export interface JSONdatabase {
+  dbName: string;
+  tables?: Table[] | [];
+  relations?: Relation[] | [];
+}
+
+export type Table = {
+  name: string;
+  posX: number;
+  posY: number;
+  fields: Field[];
+};
+
+export type Field = {
+  name: string;
+  type: string;
+  autoincrement: boolean;
+  pk: boolean;
+  fk: boolean;
+  nullable: boolean;
+  defaultValue?: string;
+};
+
+export type Relation = {
+  from: { table: string; field: string };
+  to: { table: string; field: string };
+};
+
+export type JsonValue =
+| string
+| number
+| boolean
+| null
+| { [property: string]: JSON }
+| JSON[];
