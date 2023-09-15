@@ -8,7 +8,7 @@ import { TranslationRoute } from "./routes/translation.routes";
 
 config();
 const app = express();
-const port = process.env.PORT || 5050;
+const port = process.env.PORT || 8080;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
