@@ -91,7 +91,7 @@ export const duplicateDatabaseController = async (req: Request, res: Response) =
 export const createDatabaseGroupController = async (req: Request, res: Response) => {
     const validation = z.object({
         workgroupId: z.string().nonempty(),
-        workgroupName: z.string().nonempty()
+        dbGroupName: z.string().nonempty()
     });
 
     try {
@@ -103,7 +103,7 @@ export const createDatabaseGroupController = async (req: Request, res: Response)
         if (!userWorkgroup.create_right) throw new Error('User is not allowed to create a database');
 
         const group = await prisma.databases_groups.create({
-            data: { name: groupQuery.workgroupName, workgroup_id: groupQuery.workgroupId }
+            data: { name: groupQuery.dbGroupName, workgroup_id: groupQuery.workgroupId }
         });
 
         const database = await prisma.databases.create( {
