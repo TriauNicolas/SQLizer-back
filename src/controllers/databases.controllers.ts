@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import prisma from '../core/prisma';
 import { z } from 'zod';
 import { getUserFromRequest } from './authentication.controllers';
-import { JsonValue } from '../models/models';
+import { JSONdatabase, JsonValue } from '../models/models';
 
 const defaultDBSchema: JsonValue = JSON.stringify({
     dbName: 'master',
@@ -184,4 +184,9 @@ export const updateDatabaseController = async (req: Request, res: Response) => {
     } catch (error) {
         res.status(400).json( { error: error.message } );
     }
+};
+
+export const canvasGetDatabaseController = async (databaseId: string): Promise<JSONdatabase> => {
+    const db = await prisma.databases.findFirstOrThrow({ where: { id: databaseId } });
+    return JSON.parse(db.structure as string) as JSONdatabase;
 };
