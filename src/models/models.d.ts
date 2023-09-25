@@ -6,7 +6,7 @@ export interface Databases {
   updated_at?: Date;
   delete_interval?: bigint;
   delete_date?: Date;
-  structure?: Record<string, any>;
+  structure?: JSONdatabase;
   is_public: boolean;
 }
 
@@ -52,8 +52,8 @@ export interface Workgroups {
 
 export interface JSONdatabase {
   dbName: string;
-  tables?: Table[] | [];
-  relations?: Relation[] | [];
+  tables?: Table[];
+  relations?: Relation[];
 }
 
 export type Table = {
