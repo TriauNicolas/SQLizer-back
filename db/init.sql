@@ -53,6 +53,7 @@ CREATE TABLE IF NOT EXISTS "users_workgroups" (
 -- Create the databases_groups table
 CREATE TABLE IF NOT EXISTS "databases_groups" (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
   workgroup_id UUID NOT NULL,
   delete_interval BIGINT,
   FOREIGN KEY (workgroup_id) REFERENCES workgroups(id)
@@ -67,7 +68,9 @@ CREATE TABLE IF NOT EXISTS "databases" (
   delete_interval BIGINT,
   delete_date TIMESTAMP,
   structure JSONB,
-  is_public BOOLEAN NOT NULL DEFAULT FALSE
+  is_public BOOLEAN NOT NULL DEFAULT FALSE,
+  group_id UUID NOT NULL,
+  FOREIGN KEY (group_id) REFERENCES databases_groups(id)
 );
 
 -- Functions & Triggers
