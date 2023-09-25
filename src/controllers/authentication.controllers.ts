@@ -48,6 +48,19 @@ export async function getUserFromRequest(req: Request): Promise <Users> {
     }
 }
 
+export async function canUserUpdateDatabase(userId: string, databaseId: string): Promise <boolean> {
+    try {
+        const database = await prisma.databases.findFirstOrThrow( { where: { id: databaseId } } );
+        const dbGroup = await prisma.databases_groups.findFirstOrThrow( { where: { id: database.group_id } } );
+        const workgroup = await prisma.databases_groups.findFirstOrThrow( { where: { id: dbGroup.workgroup_id } } );
+        const userWorkgroup = await prisma.users_workgroups.findFirstOrThrow( { where: { group_id: workgroup.id, user_id: userId } } );
+        if (userWorkgroup.update_right) return true;
+        return false;
+    } catch (error) {
+        return false;
+    }
+}
+
 export const registerController = async (req: Request, res: Response) => {
 
     const validation = z.object({
