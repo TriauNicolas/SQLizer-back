@@ -19,9 +19,9 @@ export async function initSocket(httpServer) {
                 if (!(await canUserUpdateDatabase(user.id, canvasRoom))) socket.emit('error', {type: 'permissionDenied', message: 'user is not allowed to update this database'});
 
                 socket.join([user.id, canvasRoom]);
-                userJoinRoomController(socket, canvasRoom, user);
-
                 console.log(user.id + ' Connected with socketId : ' + socket.id);
+                await userJoinRoomController(socket, canvasRoom, user);
+
                 // to send an event to a specific user, you must do getSocketIo().to(userId).emit('event', data)
 
                 socket.on('disconnect', () => {

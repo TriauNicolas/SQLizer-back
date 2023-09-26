@@ -110,7 +110,9 @@ export const joinRoomController = async (socket: Socket, room: string, data: any
     }
 };
 
-export const userJoinRoomController = (socket: Socket, room: string, user: Users) => {
+export const userJoinRoomController = async (socket: Socket, room: string, user: Users) => {
+    const database = await canvasGetDatabaseController(room);
+    socket.emit('responseGetDatabase', database);
     socket.broadcast.to(room).emit('userJoinRoom', { lastName: user.last_name, firstName: user.first_name, imgUrl: user?.image_url });
 };
 
