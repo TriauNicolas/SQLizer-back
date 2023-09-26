@@ -1,42 +1,80 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { getUserFromRequest } from './authentication.controllers';
 import prisma from '../core/prisma';
 import { Socket } from 'socket.io';
-import { Users } from '../models/models';
+import { Field, Relation, Table, Users } from '../models/models';
 import { canvasGetDatabaseController } from './databases.controllers';
 import { Prisma } from '@prisma/client';
 
-export const createTableController = async (socket: Socket, room: string, data: any) => {
+export const createTableController = async (socket: Socket, room: string, table: Table) => {
     try {
+        const database = await canvasGetDatabaseController(room);
+        if (database.tables.find(_table => _table.name === table.name))
+            throw new Error('Table already exist');
 
-        socket.to(room).emit('responseCreateTable', {});
+        database.tables.push(table);
+        await prisma.databases.update( { where: { id: room }, data: { structure: JSON.stringify(database) } } );
+        socket.to(room).emit('responseCreateTable', { table });
     } catch (error) {
         handleError(error, socket);
     }
 };
 
-export const createFieldController = async (socket: Socket, room: string, data: any) => {
+export const createFieldController = async (socket: Socket, room: string, data: { field: Field, tableName: string }) => {
     try {
+        const database = await canvasGetDatabaseController(room);
+        let databaseUpdated = false;
+        database.tables.forEach(table => {
+            if (table.name === data.tableName) {
+                table.fields.push(data.field);
+                databaseUpdated = true;
+            }
+        });
 
-        socket.to(room).emit('responseCreateField', {});
+        if (!databaseUpdated)
+            throw new Error('Table does not exist');
+
+        await prisma.databases.update( { where: { id: room }, data: { structure: JSON.stringify(database) } } );
+        socket.to(room).emit('responseCreateField', { tableName: data.tableName, field: data.field } );
     } catch (error) {
         handleError(error, socket);
     }
 };
 
-export const updateTableNameController = async (socket: Socket, room: string, data: any) => {
+export const updateTableNameController = async (socket: Socket, room: string, data: { tableName: string, newTableName: string }) => {
     try {
+        const database = await canvasGetDatabaseController(room);
+        let databaseUpdated = false;
+        database.tables.forEach(table => {
+            if (table.name === data.tableName) {
+                table.name = data.newTableName;
+                databaseUpdated = true;
+            }
+        });
 
-        socket.to(room).emit('responseUpdateTableName', {});
+        if (!databaseUpdated)
+            throw new Error('Table does not exist');
+
+        socket.to(room).emit('responseUpdateTableName', {tableName: data.tableName, newTableName: data.newTableName});
     } catch (error) {
         handleError(error, socket);
     }
 };
 
-export const deleteTableController = async (socket: Socket, room: string, data: any) => {
+export const deleteTableController = async (socket: Socket, room: string, tableName: string) => {
     try {
+        const database = await canvasGetDatabaseController(room);
+        let tableIndex: number | null = null;
+        database.tables.forEach((table, i) => {
+            if (table.name === tableName) {
+                tableIndex = i;
+            }
+        });
+
+        if (!tableIndex)
+            throw new Error('Table does not exist');
+
+        database.relations.splice(tableIndex, 1);
+
+        await prisma.databases.update( { where: { id: room }, data: { structure: JSON.stringify(database) } } );
 
         socket.to(room).emit('responseDeleteTable', {});
     } catch (error) {
@@ -44,68 +82,108 @@ export const deleteTableController = async (socket: Socket, room: string, data: 
     }
 };
 
-export const moveTableController = async (socket: Socket, room: string, data: {posX: number, posY: number, tableName: string}) => {
+export const moveTableController = async (socket: Socket, room: string, data: { posX: number, posY: number, tableName: string }) => {
     try {
         const database = await canvasGetDatabaseController(room);
-        const table = database.tables.find((_table) => _table.name === data.tableName);
-        table.posX = data.posX;
-        table.posY = data.posY;
-        await prisma.databases.update( { where: { id: room }, data: { structure: table } } );
-        socket.to(room).emit('responseMoveTable', { tableName: table.name, posX: table.posX, posY: table.posY } );
+        database.tables.forEach(_table => {
+            if (_table.name === data.tableName) {
+                _table.posX = data.posX;
+                _table.posY = data.posY;
+            }
+        });
+        await prisma.databases.update( { where: { id: room }, data: { structure: JSON.stringify(database) } } );
+        socket.to(room).emit('responseMoveTable', { tableName: data.tableName, posX: data.posX, posY: data.posY } );
     } catch (error) {
         handleError(error, socket);
     }
 };
 
-export const updateFieldController = async (socket: Socket, room: string, data: any) => {
+export const updateFieldController = async (socket: Socket, room: string, data: { tableName: string, fieldName: string, field: Field }) => {
     try {
+        const database = await canvasGetDatabaseController(room);
 
-        socket.to(room).emit('responseUpdateField', {});
+        let databaseUpdated = false;
+        database.tables.forEach((table) => {
+            if (table.name === data.tableName) {
+                table.fields.forEach((field) => {
+                    if (field.name === data.fieldName) {
+                        field = data.field;
+                        databaseUpdated = true;
+                    }
+                });
+
+                if (!databaseUpdated)
+                    throw new Error('Table does not exist');
+            }
+        });
+        await prisma.databases.update( { where: { id: room }, data: { structure: JSON.stringify(database) } } );
+        socket.to(room).emit('responseUpdateField', {tableName: data.tableName, fieldName: data.fieldName, field: data.field});
     } catch (error) {
         handleError(error, socket);
     }
 };
 
-export const deleteFieldController = async (socket: Socket, room: string, data: any) => {
+export const deleteFieldController = async (socket: Socket, room: string, data: { tableName: string, fieldName: string }) => {
     try {
+        const database = await canvasGetDatabaseController(room);
 
-        socket.to(room).emit('responseDeleteField', {});
+        let fieldIndex: number | null = null;
+        database.tables.forEach((table) => {
+            if (table.name === data.tableName) {
+                table.fields.forEach((field, i) => {
+                    if (field.name === data.fieldName) {
+                        fieldIndex = i;
+                    }
+                });
+
+                if (!fieldIndex)
+                    throw new Error('Table does not exist');
+
+                table.fields.splice(fieldIndex, 1);
+            }
+        });
+
+        await prisma.databases.update( { where: { id: room }, data: { structure: JSON.stringify(database) } } );
+        socket.to(room).emit('responseDeleteField', {tableName: data.tableName, fieldName: data.fieldName});
     } catch (error) {
         handleError(error, socket);
     }
 };
 
-export const createEdgeController = async (socket: Socket, room: string, data: any) => {
+export const createEdgeController = async (socket: Socket, room: string, relation: Relation) => {
     try {
+        const database = await canvasGetDatabaseController(room);
+        if (!database.tables.some(table => table.name === relation.from.table) || !database.tables.some(table => table.name === relation.to.table))
+            throw new Error('The tables are invalids');
 
-        socket.to(room).emit('responseCreateEdge', {});
+        if (database.relations.find(_relation => _relation === relation))
+            throw new Error('Relation already exist');
+
+        database.relations.push(relation);
+        await prisma.databases.update( { where: { id: room }, data: { structure: JSON.stringify(database) } } );
+        socket.to(room).emit('responseCreateEdge', relation);
     } catch (error) {
         handleError(error, socket);
     }
 };
 
-export const deleteEdgeController = async (socket: Socket, room: string, data: any) => {
+export const deleteEdgeController = async (socket: Socket, room: string, relation: Relation) => {
     try {
+        const database = await canvasGetDatabaseController(room);
+        let relationIndex: number | null = null;
+        database.relations.forEach((_relation, i) => {
+            if (_relation === relation) {
+                relationIndex = i;
+            }
+        });
 
-        socket.to(room).emit('responseDeleteEdge', {});
-    } catch (error) {
-        handleError(error, socket);
-    }
-};
+        if (!relationIndex)
+            throw new Error('Table does not exist');
 
-export const updateEdgeController = async (socket: Socket, room: string, data: any) => {
-    try {
+        database.relations.splice(relationIndex, 1);
 
-        socket.to(room).emit('responseUpdateEdge', {});
-    } catch (error) {
-        handleError(error, socket);
-    }
-};
-
-export const joinRoomController = async (socket: Socket, room: string, data: any) => {
-    try {
-
-        socket.to(room).emit('responseJoinRoom', {});
+        await prisma.databases.update( { where: { id: room }, data: { structure: JSON.stringify(database) } } );
+        socket.to(room).emit('responseDeleteEdge', relation);
     } catch (error) {
         handleError(error, socket);
     }
@@ -125,7 +203,7 @@ export const userLeaveRoomController = (socket: Socket, room: string, user: User
     }
 };
 
-const handleError = (socket: Socket, error: any) => {
+const handleError = (socket: Socket, error) => {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
         socket.emit('error', {type: error.name, message: error.message});
     } else {

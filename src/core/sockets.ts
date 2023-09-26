@@ -1,6 +1,7 @@
 import { Server, Socket } from 'socket.io';
 import { canUserUpdateDatabase, getUserFromToken } from '../controllers/authentication.controllers';
-import { createEdgeController, createFieldController, createTableController, deleteEdgeController, deleteFieldController, deleteTableController, moveTableController, updateEdgeController, updateFieldController, updateTableNameController, userJoinRoomController, userLeaveRoomController } from '../controllers/canvas.controllers';
+import { createEdgeController, createFieldController, createTableController, deleteEdgeController, deleteFieldController, deleteTableController, moveTableController, updateFieldController, updateTableNameController, userJoinRoomController, userLeaveRoomController } from '../controllers/canvas.controllers';
+import { Field, Relation, Table } from '../models/models';
 
 let io;
 
@@ -28,44 +29,40 @@ export async function initSocket(httpServer) {
                     userLeaveRoomController(socket, canvasRoom, user);
                 });
 
-                socket.on('requestCreateTable', async (data) => {
-                    await createTableController(socket, canvasRoom, data);
+                socket.on('requestCreateTable', async (table: Table) => {
+                    await createTableController(socket, canvasRoom, table);
                 });
 
-                socket.on('requestCreateField', async (data) => {
+                socket.on('requestCreateField', async (data: { field: Field, tableName: string }) => {
                     await createFieldController(socket, canvasRoom, data);
                 });
 
-                socket.on('requestUpdateTableName', async (data) => {
+                socket.on('requestUpdateTableName', async (data: { tableName: string, newTableName: string }) => {
                     await updateTableNameController(socket, canvasRoom, data);
                 });
 
-                socket.on('requestDeleteTable', async (data) => {
-                    await deleteTableController(socket, canvasRoom, data);
+                socket.on('requestDeleteTable', async (tableName: string) => {
+                    await deleteTableController(socket, canvasRoom, tableName);
                 });
 
-                socket.on('requestMoveTable', async (data) => {
+                socket.on('requestMoveTable', async (data: { posX: number, posY: number, tableName: string }) => {
                     await moveTableController(socket, canvasRoom, data);
                 });
 
-                socket.on('requestUpdateField', async (data) => {
+                socket.on('requestUpdateField', async (data: { tableName: string, fieldName: string, field: Field }) => {
                     await updateFieldController(socket, canvasRoom, data);
                 });
 
-                socket.on('requestDeleteField', async (data) => {
+                socket.on('requestDeleteField', async (data: { tableName: string, fieldName: string }) => {
                     await deleteFieldController(socket, canvasRoom, data);
                 });
 
-                socket.on('requestCreateEdge', async (data) => {
-                    await createEdgeController(socket, canvasRoom, data);
+                socket.on('requestCreateEdge', async (relation: Relation) => {
+                    await createEdgeController(socket, canvasRoom, relation);
                 });
 
-                socket.on('requestDeleteEdge', async (data) => {
-                    await deleteEdgeController(socket, canvasRoom, data);
-                });
-
-                socket.on('requestUpdateEdge', async (data) => {
-                    await updateEdgeController(socket, canvasRoom, data);
+                socket.on('requestDeleteEdge', async (relation: Relation) => {
+                    await deleteEdgeController(socket, canvasRoom, relation);
                 });
             } catch (error) {
                 socket.emit('error', {type: 'invalidToken', message: error.message});
