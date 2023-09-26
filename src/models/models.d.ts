@@ -68,7 +68,6 @@ export type Field = {
   type: string;
   autoincrement: boolean;
   pk: boolean;
-  fk: boolean;
   nullable: boolean;
   defaultValue?: string;
 };
