@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { Request, Response } from 'express';
-import { resetPassword, forgetPassword, loginController, registerController } from '../controllers/authentication.controllers';
+import { resetPassword, forgetPassword, loginController, registerController, verifTokenController } from '../controllers/authentication.controllers';
 
 const route: Router = Router();
 
@@ -12,5 +12,7 @@ route.post('/register', registerController);
 route.post('/login', loginController);
 route.post('/forgetPassword', forgetPassword);
 route.put('/resetPassword', resetPassword);
+
+route.get('/verifToken', verifTokenController);
 
 export { route as AuthenticationRoute };

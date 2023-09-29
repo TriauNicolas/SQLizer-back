@@ -38,7 +38,6 @@ export interface UsersWorkgroups {
   workgroups: Workgroups;
   users: Users;
 }
-
 export interface Workgroups {
   id: string;
   group_name: string;
