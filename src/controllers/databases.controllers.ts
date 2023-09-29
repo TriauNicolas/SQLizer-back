@@ -12,7 +12,7 @@ const defaultDBSchema: JsonValue = JSON.stringify({
 
 export const getDatabasesController = async (req: Request, res: Response) => {
     try {
-        const workgroupId = req.params.id;
+        const workgroupId = req.params.workgroupId;
         const user = await getUserFromRequest(req);
 
         const userWorkgroup = await prisma.users_workgroups.findFirst( { where: { user_id: user.id, group_id: workgroupId } } );

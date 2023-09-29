@@ -35,7 +35,6 @@ app.use('/workgroups', WorkgroupsRoute);
 app.use('/auth', AuthenticationRoute);
 app.use('/database', DatabaseRoute);
 app.use("/translation", TranslationRoute);
-app.use("/auth", AuthenticationRoute);
 
 
 httpServer.listen(port, () => {
