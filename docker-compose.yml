@@ -10,29 +10,10 @@ services:
       - ./data:/var/lib/postgresql/data
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
-      - ${EXTERNAL_POSTGRES_PORT}:${POSTGRES_PORT}
+      - 6543:5432
     networks:
-      - app_network
-
-  api:
-    image: node:lts
-    working_dir: /app
-    depends_on:
-      - db
-    volumes:
-      - ${PWD}:/app
-    command: "./start"
-    ports:
-      - 127.0.0.1:${PORT}:${PORT}
-    env_file: .env
-    networks:
-      - app_network
-    logging:
-      driver: "json-file"
-      options:
-        max-size: 10m
-    restart: on-failure:2
+      - app-network
 
 networks:
-  app_network:
+  app-network:
     driver: bridge
