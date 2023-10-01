@@ -50,7 +50,6 @@ export async function getUserFromRequest(req: Request): Promise <Users> {
 
 export async function canUserUpdateDatabase(userId: string, databaseId: string): Promise <boolean> {
     try {
-        console.log('start');
         const database = await prisma.databases.findFirstOrThrow( { where: { id: databaseId } } );
         const dbGroup = await prisma.databases_groups.findFirstOrThrow( { where: { id: database.group_id } } );
         const workgroup = await prisma.workgroups.findFirstOrThrow( { where: { id: dbGroup.workgroup_id } } );
