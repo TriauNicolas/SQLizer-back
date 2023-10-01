@@ -11,13 +11,12 @@ export async function initSocket(httpServer) {
     io.on('connection', async (socket: Socket & { request: {_query: { room: string } } } ) => {
         const token = Array.isArray(socket.request.headers.bearertoken) ? socket.request.headers.bearertoken[0] : socket.request.headers.bearertoken;
         if (token === null || typeof(token) === 'undefined') {
-            socket.emit('error', {type: 'invalidToken', message: 'Invalid token'});
+            socket.emit('socketError', {type: 'invalidToken', message: 'Invalid token'});
         } else {
             const canvasRoom = socket.request._query.room;
             try {
                 const user = await getUserFromToken(token);
-
-                if (!(await canUserUpdateDatabase(user.id, canvasRoom))) socket.emit('error', {type: 'permissionDenied', message: 'user is not allowed to update this database'});
+                if (!(await canUserUpdateDatabase(user.id, canvasRoom))) socket.emit('socketError', {type: 'permissionDenied', message: 'user is not allowed to update this database'});
 
                 socket.join([user.id, canvasRoom]);
                 console.log(user.id + ' Connected with socketId : ' + socket.id);
@@ -65,7 +64,7 @@ export async function initSocket(httpServer) {
                     await deleteEdgeController(socket, canvasRoom, relation);
                 });
             } catch (error) {
-                socket.emit('error', {type: 'invalidToken', message: error.message});
+                socket.emit('socketError', {type: 'invalidToken', message: error.message});
             }
         }
     });

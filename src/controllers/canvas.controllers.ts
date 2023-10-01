@@ -205,8 +205,8 @@ export const userLeaveRoomController = (socket: Socket, room: string, user: User
 
 const handleError = (socket: Socket, error) => {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        socket.emit('error', {type: error.name, message: error.message});
+        socket.emit('socketError', {type: error.name, message: error.message});
     } else {
-        socket.emit('error', {type: 'unknownError', message: JSON.stringify(error)});
+        socket.emit('socketError', {type: 'unknownError', message: JSON.stringify(error)});
     }
 };
