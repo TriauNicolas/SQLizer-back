@@ -14,7 +14,7 @@ export const createTableController = async (socket: Socket, room: string, table:
         await prisma.databases.update( { where: { id: room }, data: { structure: JSON.stringify(database) } } );
         socket.to(room).emit('responseCreateTable', { table });
     } catch (error) {
-        handleError(error, socket);
+        handleError(socket, error);
     }
 };
 
@@ -35,7 +35,7 @@ export const createFieldController = async (socket: Socket, room: string, data: 
         await prisma.databases.update( { where: { id: room }, data: { structure: JSON.stringify(database) } } );
         socket.to(room).emit('responseCreateField', { tableName: data.tableName, field: data.field } );
     } catch (error) {
-        handleError(error, socket);
+        handleError(socket, error);
     }
 };
 
@@ -55,7 +55,7 @@ export const updateTableNameController = async (socket: Socket, room: string, da
 
         socket.to(room).emit('responseUpdateTableName', {tableName: data.tableName, newTableName: data.newTableName});
     } catch (error) {
-        handleError(error, socket);
+        handleError(socket, error);
     }
 };
 
@@ -78,7 +78,7 @@ export const deleteTableController = async (socket: Socket, room: string, tableN
 
         socket.to(room).emit('responseDeleteTable', {});
     } catch (error) {
-        handleError(error, socket);
+        handleError(socket, error);
     }
 };
 
@@ -94,7 +94,7 @@ export const moveTableController = async (socket: Socket, room: string, data: { 
         await prisma.databases.update( { where: { id: room }, data: { structure: JSON.stringify(database) } } );
         socket.to(room).emit('responseMoveTable', { tableName: data.tableName, posX: data.posX, posY: data.posY } );
     } catch (error) {
-        handleError(error, socket);
+        handleError(socket, error);
     }
 };
 
@@ -119,7 +119,7 @@ export const updateFieldController = async (socket: Socket, room: string, data: 
         await prisma.databases.update( { where: { id: room }, data: { structure: JSON.stringify(database) } } );
         socket.to(room).emit('responseUpdateField', {tableName: data.tableName, fieldName: data.fieldName, field: data.field});
     } catch (error) {
-        handleError(error, socket);
+        handleError(socket, error);
     }
 };
 
@@ -146,7 +146,7 @@ export const deleteFieldController = async (socket: Socket, room: string, data: 
         await prisma.databases.update( { where: { id: room }, data: { structure: JSON.stringify(database) } } );
         socket.to(room).emit('responseDeleteField', {tableName: data.tableName, fieldName: data.fieldName});
     } catch (error) {
-        handleError(error, socket);
+        handleError(socket, error);
     }
 };
 
@@ -163,7 +163,7 @@ export const createEdgeController = async (socket: Socket, room: string, relatio
         await prisma.databases.update( { where: { id: room }, data: { structure: JSON.stringify(database) } } );
         socket.to(room).emit('responseCreateEdge', relation);
     } catch (error) {
-        handleError(error, socket);
+        handleError(socket, error);
     }
 };
 
@@ -185,7 +185,7 @@ export const deleteEdgeController = async (socket: Socket, room: string, relatio
         await prisma.databases.update( { where: { id: room }, data: { structure: JSON.stringify(database) } } );
         socket.to(room).emit('responseDeleteEdge', relation);
     } catch (error) {
-        handleError(error, socket);
+        handleError(socket, error);
     }
 };
 
@@ -199,7 +199,7 @@ export const userLeaveRoomController = (socket: Socket, room: string, user: User
     try {
         socket.broadcast.to(room).emit('userLeaveRoom', { lastName: user.last_name, firstName: user.first_name });
     } catch (error) {
-        handleError(error, socket);
+        handleError(socket, error);
     }
 };
 
@@ -207,6 +207,6 @@ const handleError = (socket: Socket, error) => {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
         socket.emit('socketError', {type: error.name, message: error.message});
     } else {
-        socket.emit('socketError', {type: 'unknownError', message: JSON.stringify(error)});
+        socket.emit('socketError', {type: 'unknownError', message: typeof error === 'string' ? error : JSON.stringify(error)});
     }
 };
