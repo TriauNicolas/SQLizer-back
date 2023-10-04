@@ -12,6 +12,7 @@ export const createTableController = async (socket: Socket, room: string, table:
 
         database.tables.push(table);
         await prisma.databases.update( { where: { id: room }, data: { structure: JSON.stringify(database) } } );
+        console.log(database);
         socket.to(room).emit('responseCreateTable', { table });
     } catch (error) {
         handleError(socket, error);
