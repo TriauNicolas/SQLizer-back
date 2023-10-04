@@ -110,7 +110,7 @@ export const loginController = async (req: Request, res: Response) => {
 
         const token: string = sign({id: user.id}, process.env.JWT_KEY, { expiresIn: '7d' });
 
-        res.json({token});
+        res.json({token, firstName: user.first_name, lastName: user.last_name, email: user.email});
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
