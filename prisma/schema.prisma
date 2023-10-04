@@ -7,22 +7,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model databases {
-  id              String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  name            String    @db.VarChar(255)
-  created_at      DateTime? @default(now()) @db.Timestamp(6)
-  updated_at      DateTime? @default(now()) @db.Timestamp(6)
-  delete_interval BigInt?
-  delete_date     DateTime? @db.Timestamp(6)
-  structure       Json?
-  is_public       Boolean   @default(false)
-}
-
 model databases_groups {
-  id              String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  workgroup_id    String     @db.Uuid
+  id              String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name            String      @db.VarChar(255)
+  workgroup_id    String      @db.Uuid
   delete_interval BigInt?
-  workgroups      workgroups @relation(fields: [workgroup_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  databases       databases[]
+  workgroups      workgroups  @relation(fields: [workgroup_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model users {
@@ -58,4 +49,17 @@ model workgroups {
   databases_groups databases_groups[]
   users_workgroups users_workgroups[]
   users            users              @relation(fields: [creator_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model databases {
+  id               String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name             String           @db.VarChar(255)
+  created_at       DateTime?        @default(now()) @db.Timestamp(6)
+  updated_at       DateTime?        @default(now()) @db.Timestamp(6)
+  delete_interval  BigInt?
+  delete_date      DateTime?        @db.Timestamp(6)
+  structure        Json?
+  is_public        Boolean          @default(false)
+  group_id         String           @db.Uuid
+  databases_groups databases_groups @relation(fields: [group_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }

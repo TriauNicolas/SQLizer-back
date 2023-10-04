@@ -76,3 +76,12 @@ export type Relation = {
   from: { table: string; field: string };
   to: { table: string; field: string };
 };
+
+export type JsonValue =
+| string
+| number
+| boolean
+| null
+| { [property: string]: JSON }
+| JSON[];
+

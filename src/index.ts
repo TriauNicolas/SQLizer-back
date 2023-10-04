@@ -1,9 +1,9 @@
 import express from "express";
 import cors from "cors";
-
-import { config } from "dotenv";
-import { AuthenticationRoute } from "./routes/authentication.routes";
-import { WorkgroupsRoute } from "./routes/workgroups.routes";
+import { config } from 'dotenv';
+import { AuthenticationRoute } from './routes/authentication.routes';
+import { WorkgroupsRoute } from './routes/workgroups.routes';
+import { DatabaseRoute } from './routes/databases.routes';
 import { TranslationRoute } from "./routes/translation.routes";
 
 config();
@@ -24,8 +24,9 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use("/workgroups", WorkgroupsRoute);
-app.use("/auth", AuthenticationRoute);
+app.use('/workgroups', WorkgroupsRoute);
+app.use('/auth', AuthenticationRoute);
+app.use('/database', DatabaseRoute);
 app.use("/translation", TranslationRoute);
 
 app.listen(port, async () => {
