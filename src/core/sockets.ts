@@ -29,39 +29,39 @@ export async function initSocket(httpServer) {
                 });
 
                 socket.on('requestCreateTable', async (table: Table) => {
-                    await createTableController(socket, canvasRoom, table);
+                    await createTableController(socket, canvasRoom, table, io);
                 });
 
                 socket.on('requestCreateField', async (data: { field: Field, tableName: string }) => {
-                    await createFieldController(socket, canvasRoom, data);
+                    await createFieldController(socket, canvasRoom, data, io);
                 });
 
                 socket.on('requestUpdateTableName', async (data: { tableName: string, newTableName: string }) => {
-                    await updateTableNameController(socket, canvasRoom, data);
+                    await updateTableNameController(socket, canvasRoom, data, io);
                 });
 
                 socket.on('requestDeleteTable', async (tableName: string) => {
-                    await deleteTableController(socket, canvasRoom, tableName);
+                    await deleteTableController(socket, canvasRoom, tableName, io);
                 });
 
                 socket.on('requestMoveTable', async (data: { posX: number, posY: number, tableName: string }) => {
-                    await moveTableController(socket, canvasRoom, data);
+                    await moveTableController(socket, canvasRoom, data, io);
                 });
 
                 socket.on('requestUpdateField', async (data: { tableName: string, fieldName: string, field: Field }) => {
-                    await updateFieldController(socket, canvasRoom, data);
+                    await updateFieldController(socket, canvasRoom, data, io);
                 });
 
                 socket.on('requestDeleteField', async (data: { tableName: string, fieldName: string }) => {
-                    await deleteFieldController(socket, canvasRoom, data);
+                    await deleteFieldController(socket, canvasRoom, data, io);
                 });
 
                 socket.on('requestCreateEdge', async (relation: Relation) => {
-                    await createEdgeController(socket, canvasRoom, relation);
+                    await createEdgeController(socket, canvasRoom, relation, io);
                 });
 
                 socket.on('requestDeleteEdge', async (relation: Relation) => {
-                    await deleteEdgeController(socket, canvasRoom, relation);
+                    await deleteEdgeController(socket, canvasRoom, relation, io);
                 });
             } catch (error) {
                 socket.emit('socketError', {type: 'invalidToken', message: error.message});

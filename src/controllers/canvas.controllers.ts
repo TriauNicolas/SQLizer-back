@@ -1,10 +1,10 @@
 import prisma from '../core/prisma';
-import { Socket } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { Field, Relation, Table, Users } from '../models/models';
 import { canvasGetDatabaseController } from './databases.controllers';
 import { Prisma } from '@prisma/client';
 
-export const createTableController = async (socket: Socket, room: string, table: Table) => {
+export const createTableController = async (socket: Socket, room: string, table: Table, io: Server) => {
     try {
         const database = await canvasGetDatabaseController(room);
         if (database.tables.find(_table => _table.name === table.name))
@@ -13,13 +13,13 @@ export const createTableController = async (socket: Socket, room: string, table:
         database.tables.push(table);
         await prisma.databases.update( { where: { id: room }, data: { structure: JSON.stringify(database) } } );
         console.log(database);
-        socket.to(room).emit('responseCreateTable', { table });
+        io.in(room).emit('responseCreateTable', { table });
     } catch (error) {
         handleError(socket, error);
     }
 };
 
-export const createFieldController = async (socket: Socket, room: string, data: { field: Field, tableName: string }) => {
+export const createFieldController = async (socket: Socket, room: string, data: { field: Field, tableName: string }, io: Server) => {
     try {
         const database = await canvasGetDatabaseController(room);
         let databaseUpdated = false;
@@ -34,13 +34,13 @@ export const createFieldController = async (socket: Socket, room: string, data: 
             throw new Error('Table does not exist');
 
         await prisma.databases.update( { where: { id: room }, data: { structure: JSON.stringify(database) } } );
-        socket.to(room).emit('responseCreateField', { tableName: data.tableName, field: data.field } );
+        io.in(room).emit('responseCreateField', { tableName: data.tableName, field: data.field } );
     } catch (error) {
         handleError(socket, error);
     }
 };
 
-export const updateTableNameController = async (socket: Socket, room: string, data: { tableName: string, newTableName: string }) => {
+export const updateTableNameController = async (socket: Socket, room: string, data: { tableName: string, newTableName: string }, io: Server) => {
     try {
         const database = await canvasGetDatabaseController(room);
         let databaseUpdated = false;
@@ -54,13 +54,13 @@ export const updateTableNameController = async (socket: Socket, room: string, da
         if (!databaseUpdated)
             throw new Error('Table does not exist');
 
-        socket.to(room).emit('responseUpdateTableName', {tableName: data.tableName, newTableName: data.newTableName});
+        io.in(room).emit('responseUpdateTableName', {tableName: data.tableName, newTableName: data.newTableName});
     } catch (error) {
         handleError(socket, error);
     }
 };
 
-export const deleteTableController = async (socket: Socket, room: string, tableName: string) => {
+export const deleteTableController = async (socket: Socket, room: string, tableName: string, io: Server) => {
     try {
         const database = await canvasGetDatabaseController(room);
         let tableIndex: number | null = null;
@@ -77,13 +77,13 @@ export const deleteTableController = async (socket: Socket, room: string, tableN
 
         await prisma.databases.update( { where: { id: room }, data: { structure: JSON.stringify(database) } } );
 
-        socket.to(room).emit('responseDeleteTable', {});
+        io.in(room).emit('responseDeleteTable', {});
     } catch (error) {
         handleError(socket, error);
     }
 };
 
-export const moveTableController = async (socket: Socket, room: string, data: { posX: number, posY: number, tableName: string }) => {
+export const moveTableController = async (socket: Socket, room: string, data: { posX: number, posY: number, tableName: string }, io: Server) => {
     try {
         const database = await canvasGetDatabaseController(room);
         database.tables.forEach(_table => {
@@ -93,13 +93,13 @@ export const moveTableController = async (socket: Socket, room: string, data: { 
             }
         });
         await prisma.databases.update( { where: { id: room }, data: { structure: JSON.stringify(database) } } );
-        socket.to(room).emit('responseMoveTable', { tableName: data.tableName, posX: data.posX, posY: data.posY } );
+        io.in(room).emit('responseMoveTable', { tableName: data.tableName, posX: data.posX, posY: data.posY } );
     } catch (error) {
         handleError(socket, error);
     }
 };
 
-export const updateFieldController = async (socket: Socket, room: string, data: { tableName: string, fieldName: string, field: Field }) => {
+export const updateFieldController = async (socket: Socket, room: string, data: { tableName: string, fieldName: string, field: Field }, io: Server) => {
     try {
         const database = await canvasGetDatabaseController(room);
 
@@ -118,13 +118,13 @@ export const updateFieldController = async (socket: Socket, room: string, data: 
             }
         });
         await prisma.databases.update( { where: { id: room }, data: { structure: JSON.stringify(database) } } );
-        socket.to(room).emit('responseUpdateField', {tableName: data.tableName, fieldName: data.fieldName, field: data.field});
+        io.in(room).emit('responseUpdateField', {tableName: data.tableName, fieldName: data.fieldName, field: data.field});
     } catch (error) {
         handleError(socket, error);
     }
 };
 
-export const deleteFieldController = async (socket: Socket, room: string, data: { tableName: string, fieldName: string }) => {
+export const deleteFieldController = async (socket: Socket, room: string, data: { tableName: string, fieldName: string }, io: Server) => {
     try {
         const database = await canvasGetDatabaseController(room);
 
@@ -145,13 +145,13 @@ export const deleteFieldController = async (socket: Socket, room: string, data: 
         });
 
         await prisma.databases.update( { where: { id: room }, data: { structure: JSON.stringify(database) } } );
-        socket.to(room).emit('responseDeleteField', {tableName: data.tableName, fieldName: data.fieldName});
+        io.in(room).emit('responseDeleteField', {tableName: data.tableName, fieldName: data.fieldName});
     } catch (error) {
         handleError(socket, error);
     }
 };
 
-export const createEdgeController = async (socket: Socket, room: string, relation: Relation) => {
+export const createEdgeController = async (socket: Socket, room: string, relation: Relation, io: Server) => {
     try {
         const database = await canvasGetDatabaseController(room);
         if (!database.tables.some(table => table.name === relation.from.table) || !database.tables.some(table => table.name === relation.to.table))
@@ -162,13 +162,13 @@ export const createEdgeController = async (socket: Socket, room: string, relatio
 
         database.relations.push(relation);
         await prisma.databases.update( { where: { id: room }, data: { structure: JSON.stringify(database) } } );
-        socket.to(room).emit('responseCreateEdge', relation);
+        io.in(room).emit('responseCreateEdge', relation);
     } catch (error) {
         handleError(socket, error);
     }
 };
 
-export const deleteEdgeController = async (socket: Socket, room: string, relation: Relation) => {
+export const deleteEdgeController = async (socket: Socket, room: string, relation: Relation, io: Server) => {
     try {
         const database = await canvasGetDatabaseController(room);
         let relationIndex: number | null = null;
@@ -184,7 +184,7 @@ export const deleteEdgeController = async (socket: Socket, room: string, relatio
         database.relations.splice(relationIndex, 1);
 
         await prisma.databases.update( { where: { id: room }, data: { structure: JSON.stringify(database) } } );
-        socket.to(room).emit('responseDeleteEdge', relation);
+        io.in(room).emit('responseDeleteEdge', relation);
     } catch (error) {
         handleError(socket, error);
     }
