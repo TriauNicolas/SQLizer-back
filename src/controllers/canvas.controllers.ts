@@ -77,7 +77,7 @@ export const deleteTableController = async (socket: Socket, room: string, tableN
 
         await prisma.databases.update( { where: { id: room }, data: { structure: JSON.stringify(database) } } );
 
-        io.in(room).emit('responseDeleteTable', {});
+        io.in(room).emit('responseDeleteTable', {tableName});
     } catch (error) {
         handleError(socket, error);
     }
