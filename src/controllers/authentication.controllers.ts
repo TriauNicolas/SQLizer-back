@@ -109,8 +109,7 @@ export const loginController = async (req: Request, res: Response) => {
         if (!(await PasswordException.comparePassword(credentials.password, user.password))) throw new PasswordException;
 
         const token: string = sign({id: user.id}, process.env.JWT_KEY, { expiresIn: '7d' });
-
-        res.json({token});
+        res.json({email: user.email, firstName: user.first_name, lastName: user.last_name, token});
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
