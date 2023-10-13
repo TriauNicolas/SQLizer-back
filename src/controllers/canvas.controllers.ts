@@ -12,7 +12,6 @@ export const createTableController = async (socket: Socket, room: string, table:
 
         database.tables.push(table);
         await prisma.databases.update( { where: { id: room }, data: { structure: JSON.stringify(database) } } );
-        console.log(database);
         io.in(room).emit('responseCreateTable', { table });
     } catch (error) {
         handleError(socket, error);
@@ -55,7 +54,6 @@ export const updateTableNameController = async (socket: Socket, room: string, da
             throw new Error('Table does not exist');
 
         await prisma.databases.update( { where: { id: room }, data: { structure: JSON.stringify(database) } } );
-
         io.in(room).emit('responseUpdateTableName', { tableName: data.tableName, newTableName: data.newTableName });
     } catch (error) {
         handleError(socket, error);
@@ -104,7 +102,7 @@ export const moveTableController = async (socket: Socket, room: string, data: { 
 export const updateFieldController = async (socket: Socket, room: string, data: { tableName: string, fieldName: string, field: Field }, io: Server) => {
     try {
         const database = await canvasGetDatabaseController(room);
-
+        
         let databaseUpdated = false;
         database.tables.forEach((table) => {
             if (table.name === data.tableName) {
@@ -139,8 +137,8 @@ export const deleteFieldController = async (socket: Socket, room: string, data: 
                     }
                 });
 
-                if (!fieldIndex)
-                    throw new Error('Table does not exist');
+                if (fieldIndex !== 0 && !fieldIndex)
+                    throw new Error('Field does not exist');
 
                 table.fields.splice(fieldIndex, 1);
             }
