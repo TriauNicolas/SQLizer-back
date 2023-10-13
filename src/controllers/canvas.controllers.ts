@@ -54,7 +54,9 @@ export const updateTableNameController = async (socket: Socket, room: string, da
         if (!databaseUpdated)
             throw new Error('Table does not exist');
 
-        io.in(room).emit('responseUpdateTableName', {tableName: data.tableName, newTableName: data.newTableName});
+        await prisma.databases.update( { where: { id: room }, data: { structure: JSON.stringify(database) } } );
+
+        io.in(room).emit('responseUpdateTableName', { tableName: data.tableName, newTableName: data.newTableName });
     } catch (error) {
         handleError(socket, error);
     }
