@@ -202,3 +202,67 @@ export const removeUserOfWorkgroupController = async (req: Request, res: Respons
         res.status(400).json({ error: error.message });
     }
 };
+
+export const getWorkgroupsDatasController = async (req: Request, res: Response) => {
+    try {
+        const user = await getUserFromRequest(req);
+        const userWorkgroups = await prisma.users_workgroups.findMany({
+            where: {
+                user_id: user.id
+            },
+            include: {
+                workgroups: true
+            }
+        });
+
+        const response = [];
+
+        userWorkgroups.forEach(async workgroup => {
+
+            const formatedData: {groupName: string; isAdmin: boolean, rights: { create_right: boolean; update_right: boolean; delete_right: boolean }, users?: { first_name: string; last_name: string; email: string; rights: { create_right: boolean; update_right: boolean; delete_right: boolean; } }[] } = {
+                groupName: workgroup.workgroups.group_name,
+                isAdmin: user.id === workgroup.workgroups.creator_id,
+                rights: {
+                    create_right: workgroup.create_right,
+                    update_right: workgroup.update_right,
+                    delete_right: workgroup.delete_right
+                }
+            };
+
+            if (formatedData.isAdmin) {
+                formatedData.users = [];
+
+                const usersRelations =  await prisma.users_workgroups.findMany({
+                    where: {
+                        group_id: workgroup.group_id
+                    },
+                    include: {
+                        users: true
+                    }
+                });
+
+                usersRelations.forEach(relation => {
+                    const formatedUser: { first_name: string; last_name: string; email: string; rights: { create_right: boolean; update_right: boolean; delete_right: boolean; } } = {
+                        first_name: relation.users.first_name,
+                        last_name: relation.users.last_name,
+                        email: relation.users.email,
+                        rights: {
+                            create_right: relation.create_right,
+                            update_right: relation.update_right,
+                            delete_right: relation.delete_right
+                        }
+                    };
+
+                    formatedData.users.push(formatedUser);
+                });
+            }
+
+            response.push(formatedData);
+        });
+
+        res.json({success: true, groups: response});
+
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
