@@ -151,7 +151,7 @@ export const deleteFieldController = async (socket: Socket, room: string, data: 
     }
 };
 
-export const createEdgeController = async (socket: Socket, room: string, relation: Relation, io: Server) => {
+export const createEdgeController = async (socket: Socket, room: string, relation: Relation) => {
     try {
         const database = await canvasGetDatabaseController(room);
         if (!database.tables.some(table => table.name === relation.from.table) || !database.tables.some(table => table.name === relation.to.table))
@@ -168,7 +168,7 @@ export const createEdgeController = async (socket: Socket, room: string, relatio
     }
 };
 
-export const deleteEdgeController = async (socket: Socket, room: string, relation: Relation, io: Server) => {
+export const deleteEdgeController = async (socket: Socket, room: string, relation: Relation) => {
     try {
         const database = await canvasGetDatabaseController(room);
 

@@ -57,11 +57,11 @@ export async function initSocket(httpServer) {
                 });
 
                 socket.on('requestCreateEdge', async (relation: Relation) => {
-                    await createEdgeController(socket, canvasRoom, relation, io);
+                    await createEdgeController(socket, canvasRoom, relation);
                 });
 
                 socket.on('requestDeleteEdge', async (relation: Relation) => {
-                    await deleteEdgeController(socket, canvasRoom, relation, io);
+                    await deleteEdgeController(socket, canvasRoom, relation);
                 });
             } catch (error) {
                 socket.emit('socketError', {type: 'invalidToken', message: error.message});
