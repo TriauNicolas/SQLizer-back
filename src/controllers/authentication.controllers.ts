@@ -76,7 +76,7 @@ export const registerController = async (req: Request, res: Response) => {
         const prismaUser = await prisma.users.create({
             data: {
                 first_name: user.first_name,
-                last_name: user.first_name,
+                last_name: user.last_name,
                 email: user.email,
                 password: await PasswordException.hashPassword(user.password)
             }
