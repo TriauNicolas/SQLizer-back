@@ -5,7 +5,11 @@ import { Users } from "../models/models";
 import { z } from "zod";
 import { sign, verify } from "jsonwebtoken";
 import { sendResetPasswordEmail } from "../core/nodemailer";
-import { registerService } from "../services/authentication.services";
+import {
+  getUserByEmail,
+  getUserById,
+  registerService,
+} from "../services/authentication.services";
 
 // const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
@@ -30,7 +34,7 @@ export async function getUserFromToken(token: string): Promise<Users> {
 
     if (!id) throw new Error("Invalid Token");
 
-    const user: Users = await prisma.users.findUnique({ where: { id } });
+    const user = await getUserById(id);
 
     if (!user) throw new Error("User not valid");
 
@@ -99,9 +103,7 @@ export const loginController = async (req: Request, res: Response) => {
 
   try {
     const credentials = validation.parse(req.body);
-    const user: Users = await prisma.users.findUnique({
-      where: { email: credentials.email },
-    });
+    const user = await getUserByEmail(credentials.email);
 
     if (!user) throw new Error("Invalid Email");
 

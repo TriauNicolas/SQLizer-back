@@ -36,3 +36,11 @@ export const registerService = async (user: Users) => {
     throw new Error(error.message);
   }
 };
+
+export const getUserByEmail = async (email: string):Promise<Users> => {
+  return await prisma.users.findUnique({ where: { email } });
+};
+
+export const getUserById = async (id: string):Promise<Users> => {
+  return await prisma.users.findUnique({ where: { id } });
+};
