@@ -1,8 +1,8 @@
-import prisma from "../core/prisma";
 import { Server, Socket } from "socket.io";
 import { Field, Relation, Table, Users } from "../models/models";
 import { canvasGetDatabaseController } from "./databases.controllers";
 import { Prisma } from "@prisma/client";
+import { updateDatabaseStructure } from "../services/databases.services";
 
 export const createTableController = async (
   socket: Socket,
@@ -16,10 +16,7 @@ export const createTableController = async (
       throw new Error("Table already exist");
 
     database.tables.push(table);
-    await prisma.databases.update({
-      where: { id: room },
-      data: { structure: JSON.stringify(database) },
-    });
+    await updateDatabaseStructure(room, JSON.stringify(database));
     io.in(room).emit("responseCreateTable", { table });
   } catch (error) {
     handleError(socket, error);
@@ -44,10 +41,7 @@ export const createFieldController = async (
 
     if (!databaseUpdated) throw new Error("Table does not exist");
 
-    await prisma.databases.update({
-      where: { id: room },
-      data: { structure: JSON.stringify(database) },
-    });
+    await updateDatabaseStructure(room, JSON.stringify(database));
     io.in(room).emit("responseCreateField", {
       tableName: data.tableName,
       field: data.field,
@@ -75,10 +69,7 @@ export const updateTableNameController = async (
 
     if (!databaseUpdated) throw new Error("Table does not exist");
 
-    await prisma.databases.update({
-      where: { id: room },
-      data: { structure: JSON.stringify(database) },
-    });
+    await updateDatabaseStructure(room, JSON.stringify(database));
     io.in(room).emit("responseUpdateTableName", {
       tableName: data.tableName,
       newTableName: data.newTableName,
@@ -107,11 +98,7 @@ export const deleteTableController = async (
 
     database.relations.splice(tableIndex, 1);
 
-    await prisma.databases.update({
-      where: { id: room },
-      data: { structure: JSON.stringify(database) },
-    });
-
+    await updateDatabaseStructure(room, JSON.stringify(database));
     io.in(room).emit("responseDeleteTable", { tableName });
   } catch (error) {
     handleError(socket, error);
@@ -132,10 +119,7 @@ export const moveTableController = async (
         _table.posY = data.posY;
       }
     });
-    await prisma.databases.update({
-      where: { id: room },
-      data: { structure: JSON.stringify(database) },
-    });
+    await updateDatabaseStructure(room, JSON.stringify(database));
     io.in(room).emit("responseMoveTable", {
       tableName: data.tableName,
       posX: data.posX,
@@ -168,10 +152,7 @@ export const updateFieldController = async (
         if (!databaseUpdated) throw new Error("Table does not exist");
       }
     });
-    await prisma.databases.update({
-      where: { id: room },
-      data: { structure: JSON.stringify(database) },
-    });
+    await updateDatabaseStructure(room, JSON.stringify(database));
     io.in(room).emit("responseUpdateField", {
       tableName: data.tableName,
       fieldName: data.fieldName,
@@ -207,10 +188,7 @@ export const deleteFieldController = async (
       }
     });
 
-    await prisma.databases.update({
-      where: { id: room },
-      data: { structure: JSON.stringify(database) },
-    });
+    await updateDatabaseStructure(room, JSON.stringify(database));
     io.in(room).emit("responseDeleteField", {
       tableName: data.tableName,
       fieldName: data.fieldName,
@@ -237,10 +215,7 @@ export const createEdgeController = async (
       throw new Error("Relation already exist");
 
     database.relations.push(relation);
-    await prisma.databases.update({
-      where: { id: room },
-      data: { structure: JSON.stringify(database) },
-    });
+    await updateDatabaseStructure(room, JSON.stringify(database));
     socket.broadcast.to(room).emit("responseCreateEdge", relation);
   } catch (error) {
     handleError(socket, error);
@@ -267,10 +242,7 @@ export const deleteEdgeController = async (
 
     database.relations.splice(relationIndex, 1);
 
-    await prisma.databases.update({
-      where: { id: room },
-      data: { structure: JSON.stringify(database) },
-    });
+    await updateDatabaseStructure(room, JSON.stringify(database));
     socket.broadcast.to(room).emit("responseDeleteEdge", relation);
   } catch (error) {
     handleError(socket, error);
