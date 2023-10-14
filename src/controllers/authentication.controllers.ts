@@ -10,6 +10,10 @@ import {
   getUserById,
   registerService,
 } from "../services/authentication.services";
+import { getFirstDatabaseByDatabaseId } from "../services/databases.services";
+import { getUserWorkgroupByUserIdAndWorkgroupId } from "../services/usersWorkgroups.services";
+import { getFirstDatabaseGroupByGroupId } from "../services/databasesGroups.services";
+import { getFirstWorkgroup } from "../services/workgroups.services";
 
 // const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
@@ -58,18 +62,10 @@ export async function canUserUpdateDatabase(
   databaseId: string
 ): Promise<boolean> {
   try {
-    const database = await prisma.databases.findFirstOrThrow({
-      where: { id: databaseId },
-    });
-    const dbGroup = await prisma.databases_groups.findFirstOrThrow({
-      where: { id: database.group_id },
-    });
-    const workgroup = await prisma.workgroups.findFirstOrThrow({
-      where: { id: dbGroup.workgroup_id },
-    });
-    const userWorkgroup = await prisma.users_workgroups.findFirstOrThrow({
-      where: { group_id: workgroup.id, user_id: userId },
-    });
+    const database = await getFirstDatabaseByDatabaseId(databaseId);
+    const dbGroup = await getFirstDatabaseGroupByGroupId(database.group_id);
+    const workgroup = await getFirstWorkgroup(dbGroup.workgroup_id);
+    const userWorkgroup = await getUserWorkgroupByUserIdAndWorkgroupId(userId, workgroup.id, true);
     if (userWorkgroup.update_right) return true;
     return false;
   } catch (error) {

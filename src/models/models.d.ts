@@ -8,6 +8,7 @@ export interface Databases {
   delete_date?: Date;
   structure?: JSONdatabase;
   is_public: boolean;
+  group_id?: string;
 }
 
 export interface DatabasesGroups {
