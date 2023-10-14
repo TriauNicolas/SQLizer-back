@@ -218,14 +218,14 @@ export const getWorkgroupsDatasController = async (req: Request, res: Response) 
                 workgroups: true
             }
         });
-
         const response = [];
 
         for (const workgroup of userWorkgroups) {
-
-            const formatedData: {groupName: string; isAdmin: boolean, rights: { create_right: boolean; update_right: boolean; delete_right: boolean }, users?: { first_name: string; last_name: string; email: string; rights: { create_right: boolean; update_right: boolean; delete_right: boolean; } }[] } = {
-                groupName: workgroup.workgroups.group_name,
+            console.log(workgroup);
+            const formatedData: {group_name: string; group_id: string; isAdmin: boolean, rights: { create_right: boolean; update_right: boolean; delete_right: boolean }, users?: { first_name: string; last_name: string; email: string; rights: { create_right: boolean; update_right: boolean; delete_right: boolean; } }[] } = {
+                group_name: workgroup.workgroups.group_name,
                 isAdmin: user.id === workgroup.workgroups.creator_id,
+                group_id: workgroup.workgroups.id,
                 rights: {
                     create_right: workgroup.create_right,
                     update_right: workgroup.update_right,
