@@ -6,7 +6,7 @@ export interface Databases {
   updated_at?: Date;
   delete_interval?: bigint;
   delete_date?: Date;
-  structure?: Record<string, any>;
+  structure?: JSONdatabase;
   is_public: boolean;
 }
 
@@ -51,8 +51,8 @@ export interface Workgroups {
 
 export interface JSONdatabase {
   dbName: string;
-  tables: Table[];
-  relations: Relation[];
+  tables?: Table[];
+  relations?: Relation[];
 }
 
 export type Table = {
@@ -67,7 +67,6 @@ export type Field = {
   type: string;
   autoincrement: boolean;
   pk: boolean;
-  fk: boolean;
   nullable: boolean;
   defaultValue?: string;
 };
@@ -84,4 +83,3 @@ export type JsonValue =
 | null
 | { [property: string]: JSON }
 | JSON[];
-

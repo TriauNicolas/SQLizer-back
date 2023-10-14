@@ -3,6 +3,8 @@ import cors from "cors";
 import { config } from 'dotenv';
 import { AuthenticationRoute } from './routes/authentication.routes';
 import { WorkgroupsRoute } from './routes/workgroups.routes';
+import { initSocket } from './core/sockets';
+import { createServer }  from 'http';
 import { DatabaseRoute } from './routes/databases.routes';
 import { TranslationRoute } from "./routes/translation.routes";
 
@@ -24,11 +26,15 @@ app.use((req, res, next) => {
   next();
 });
 
+const httpServer = createServer(app);
+
+initSocket(httpServer);
+
 app.use('/workgroups', WorkgroupsRoute);
 app.use('/auth', AuthenticationRoute);
 app.use('/database', DatabaseRoute);
 app.use("/translation", TranslationRoute);
 
-app.listen(port, async () => {
+httpServer.listen(port, () => {
   console.log(`Server started on http://localhost:${port}`);
 });
