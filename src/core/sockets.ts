@@ -22,8 +22,6 @@ export async function initSocket(httpServer) {
                 console.log(user.id + ' Connected with socketId : ' + socket.id);
                 await userJoinRoomController(socket, canvasRoom, user);
 
-                // to send an event to a specific user, you must do getSocketIo().to(userId).emit('event', data)
-
                 socket.on('disconnect', () => {
                     userLeaveRoomController(socket, canvasRoom, user);
                 });
