@@ -1,6 +1,5 @@
 import express from "express";
 import cors from "cors";
-
 import { config } from 'dotenv';
 import { AuthenticationRoute } from './routes/authentication.routes';
 import { WorkgroupsRoute } from './routes/workgroups.routes';
@@ -35,7 +34,6 @@ app.use('/workgroups', WorkgroupsRoute);
 app.use('/auth', AuthenticationRoute);
 app.use('/database', DatabaseRoute);
 app.use("/translation", TranslationRoute);
-
 
 httpServer.listen(port, () => {
   console.log(`Server started on http://localhost:${port}`);

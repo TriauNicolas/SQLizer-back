@@ -12,7 +12,26 @@ services:
     ports:
       - 6543:5432
     networks:
-      - app-network
+      - app_network
+
+  # api:
+  #   image: node:lts
+  #   working_dir: /app
+  #   depends_on:
+  #     - db
+  #   volumes:
+  #     - ${PWD}:/app
+  #   command: "./start"
+  #   ports:
+  #     - ${PORT}:${PORT}
+  #   env_file: .env
+  #   networks:
+  #     - app_network
+  #   logging:
+  #     driver: "json-file"
+  #     options:
+  #       max-size: 10m
+  #   restart: on-failure:2
 
 networks:
   app-network:
