@@ -217,7 +217,7 @@ export const getWorkgroupsDatasController = async (req: Request, res: Response) 
 
         const response = [];
 
-        userWorkgroups.forEach(async workgroup => {
+        for (const workgroup of userWorkgroups) {
 
             const formatedData: {groupName: string; isAdmin: boolean, rights: { create_right: boolean; update_right: boolean; delete_right: boolean }, users?: { first_name: string; last_name: string; email: string; rights: { create_right: boolean; update_right: boolean; delete_right: boolean; } }[] } = {
                 groupName: workgroup.workgroups.group_name,
@@ -256,10 +256,8 @@ export const getWorkgroupsDatasController = async (req: Request, res: Response) 
                     formatedData.users.push(formatedUser);
                 });
             }
-
             response.push(formatedData);
-        });
-
+        }
         res.json({success: true, groups: response});
 
     } catch (error) {
