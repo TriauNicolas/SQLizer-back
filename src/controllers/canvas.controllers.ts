@@ -162,7 +162,7 @@ export const createEdgeController = async (socket: Socket, room: string, relatio
 
         database.relations.push(relation);
         await prisma.databases.update( { where: { id: room }, data: { structure: JSON.stringify(database) } } );
-        io.in(room).emit('responseCreateEdge', relation);
+        socket.broadcast.to(room).emit('responseCreateEdge', relation);
     } catch (error) {
         handleError(socket, error);
     }
@@ -171,10 +171,10 @@ export const createEdgeController = async (socket: Socket, room: string, relatio
 export const deleteEdgeController = async (socket: Socket, room: string, relation: Relation, io: Server) => {
     try {
         const database = await canvasGetDatabaseController(room);
+
         let relationIndex: number | null = null;
         database.relations.forEach((_relation, i) => {
-            const identicalRelation = _relation.from.table === relation.from.table && _relation.from.field === relation.from.field && _relation.to.table === relation.to.table && _relation.to.field === relation.to.field;
-            if (identicalRelation) {
+            if (JSON.stringify(_relation) === JSON.stringify(relation)) {
                 relationIndex = i;
             }
         });
@@ -185,7 +185,7 @@ export const deleteEdgeController = async (socket: Socket, room: string, relatio
         database.relations.splice(relationIndex, 1);
 
         await prisma.databases.update( { where: { id: room }, data: { structure: JSON.stringify(database) } } );
-        io.in(room).emit('responseDeleteEdge', relation);
+        socket.broadcast.to(room).emit('responseDeleteEdge', relation);
     } catch (error) {
         handleError(socket, error);
     }
