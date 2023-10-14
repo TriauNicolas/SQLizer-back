@@ -173,13 +173,14 @@ export const deleteEdgeController = async (socket: Socket, room: string, relatio
         const database = await canvasGetDatabaseController(room);
         let relationIndex: number | null = null;
         database.relations.forEach((_relation, i) => {
-            if (_relation === relation) {
+            const identicalRelation = _relation.from.table === relation.from.table && _relation.from.field === relation.from.field && _relation.to.table === relation.to.table && _relation.to.field === relation.to.field;
+            if (identicalRelation) {
                 relationIndex = i;
             }
         });
 
-        if (!relationIndex)
-            throw new Error('Table does not exist');
+        if (relationIndex !== 0 && !relationIndex)
+            throw new Error('Relation not found');
 
         database.relations.splice(relationIndex, 1);
 
@@ -205,6 +206,7 @@ export const userLeaveRoomController = (socket: Socket, room: string, user: User
 };
 
 const handleError = (socket: Socket, error) => {
+    console.log(error);
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
         socket.emit('socketError', {type: error.name, message: error.message});
     } else {
