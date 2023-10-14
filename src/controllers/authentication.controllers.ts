@@ -5,6 +5,7 @@ import { Users } from '../models/models';
 import { z } from 'zod';
 import { sign, verify } from 'jsonwebtoken';
 import { sendResetPasswordEmail } from '../core/nodemailer';
+import { registerService } from '../services/authentication.services';
 
 // const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
@@ -73,34 +74,7 @@ export const registerController = async (req: Request, res: Response) => {
     });
     try {
         const user = validation.parse(req.body);
-        const prismaUser = await prisma.users.create({
-            data: {
-                first_name: user.first_name,
-                last_name: user.last_name,
-                email: user.email,
-                password: await PasswordException.hashPassword(user.password)
-            }
-        });
-
-
-        const prismaWorkgroup = await prisma.workgroups.create({
-            data: {
-                group_name: 'Mes Projets',
-                creator_id: prismaUser.id,
-                private: true
-            }
-        });
-
-        await prisma.users_workgroups.create({
-            data: {
-                user_id: prismaUser.id,
-                group_id: prismaWorkgroup.id,
-                create_right: true,
-                update_right: true,
-                delete_right: false
-            }
-        });
-
+        await registerService(user);
         res.json({success: true});
     } catch (error) {
         res.status(400).json({ error: error.message });
