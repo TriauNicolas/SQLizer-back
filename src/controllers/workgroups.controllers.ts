@@ -222,9 +222,9 @@ export const getWorkgroupsDatasController = async (req: Request, res: Response) 
 
         for (const workgroup of userWorkgroups) {
             console.log(workgroup);
-            const formatedData: {group_name: string; group_id: string; isAdmin: boolean, rights: { create_right: boolean; update_right: boolean; delete_right: boolean }, users?: { first_name: string; last_name: string; email: string; rights: { create_right: boolean; update_right: boolean; delete_right: boolean; } }[] } = {
+            const formatedData: {group_name: string; group_id: string; is_admin: boolean, rights: { create_right: boolean; update_right: boolean; delete_right: boolean }, users?: { first_name: string; last_name: string; email: string; rights: { create_right: boolean; update_right: boolean; delete_right: boolean; } }[] } = {
                 group_name: workgroup.workgroups.group_name,
-                isAdmin: user.id === workgroup.workgroups.creator_id,
+                is_admin: user.id === workgroup.workgroups.creator_id,
                 group_id: workgroup.workgroups.id,
                 rights: {
                     create_right: workgroup.create_right,
@@ -233,7 +233,7 @@ export const getWorkgroupsDatasController = async (req: Request, res: Response) 
                 }
             };
 
-            if (formatedData.isAdmin) {
+            if (formatedData.is_admin) {
                 formatedData.users = [];
 
                 const usersRelations =  await prisma.users_workgroups.findMany({
