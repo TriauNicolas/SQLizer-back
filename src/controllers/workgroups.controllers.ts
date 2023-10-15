@@ -253,7 +253,8 @@ export const getWorkgroupsDatasController = async (req: Request, res: Response) 
                 });
 
                 usersRelations.forEach(relation => {
-                    const formatedUser: { first_name: string; last_name: string; email: string; rights: { create_right: boolean; update_right: boolean; delete_right: boolean; } } = {
+                    const formatedUser: {user_id: string; first_name: string; last_name: string; email: string; rights: { create_right: boolean; update_right: boolean; delete_right: boolean; } } = {
+                        user_id: relation.users.id,
                         first_name: relation.users.first_name,
                         last_name: relation.users.last_name,
                         email: relation.users.email,
