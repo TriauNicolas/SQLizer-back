@@ -193,3 +193,15 @@ export const verifTokenController = async (req: Request, res: Response) => {
     res.status(400).json({ error: error.message });
   }
 };
+
+export const canUserAccessDatabaseController = async (req: Request, res: Response) => {
+      try {
+        const user = await getUserFromRequest(req);
+        const databaseId = req.params.databaseId;
+        const response = await canUserUpdateDatabase(user.id, databaseId);
+        if (!response) throw new Error("User can't update database");
+        res.json({response});
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
