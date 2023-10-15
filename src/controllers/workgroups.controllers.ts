@@ -10,6 +10,7 @@ import {
 import {
   createUserWorkgroup,
   deleteManyUsersWorkgroups,
+  getUserWorkgroupByGroupId,
   getUserWorkgroupByUserId,
   getUserWorkgroupByUserIdAndWorkgroupId,
   updateUsersWorkgroups,
@@ -18,7 +19,6 @@ import {
   getUserByEmail,
   getUserById,
 } from "../services/authentication.services";
-import prisma from "../core/prisma";
 
 export const getWorkgroupsController = async (req: Request, res: Response) => {
   try {
@@ -221,14 +221,7 @@ export const removeUserOfWorkgroupController = async (
 export const getWorkgroupsDatasController = async (req: Request, res: Response) => {
     try {
         const user = await getUserFromRequest(req);
-        const userWorkgroups = await prisma.users_workgroups.findMany({
-            where: {
-                user_id: user.id
-            },
-            include: {
-                workgroups: true
-            }
-        });
+        const userWorkgroups = await getUserWorkgroupByUserId(user.id);
         const response = [];
 
         for (const workgroup of userWorkgroups) {
@@ -247,14 +240,7 @@ export const getWorkgroupsDatasController = async (req: Request, res: Response) 
             if (formatedData.is_admin) {
                 formatedData.users = [];
 
-                const usersRelations =  await prisma.users_workgroups.findMany({
-                    where: {
-                        group_id: workgroup.group_id
-                    },
-                    include: {
-                        users: true
-                    }
-                });
+                const usersRelations =  await getUserWorkgroupByGroupId(workgroup.group_id);
 
                 usersRelations.forEach(relation => {
                     const formatedUser: {user_id: string; first_name: string; last_name: string; email: string; rights: { create_right: boolean; update_right: boolean; delete_right: boolean; } } = {
@@ -292,23 +278,23 @@ export const updateUserCreateRightController = async (req: Request, res: Respons
 
         const user = await getUserFromRequest(req);
 
-        const workgroup = await prisma.workgroups.findFirst({ where: { id: query.groupId } });
+        const workgroup = await getFirstWorkgroupById(query.groupId);
         if (!workgroup) throw new Error('Workgroup not found');
 
         if (workgroup.creator_id !== user.id) throw new Error('Non-admin user can\'t edit rights');
 
-        const updatedUser = await prisma.users.findFirst({ where: { id: query.userId } });
+        const updatedUser = await getUserById(query.userId);
         if (!updatedUser) throw new Error('User not found');
 
-        const response = await prisma.users_workgroups.updateMany({
-            where: {
-                user_id: updatedUser.id,
-                group_id: workgroup.id
-            },
-            data: {
-                create_right: !!query.create_right,
-            }
-        });
+        const response = await updateUsersWorkgroups(
+          {
+            user_id: updatedUser.id,
+            group_id: workgroup.id
+          },
+          {
+            create_right: !!query.create_right,
+          }
+        );       
 
         res.json({success: true, response});
     } catch (error) {
@@ -327,29 +313,30 @@ export const updateUserUpdateRightController = async (req: Request, res: Respons
 
         const user = await getUserFromRequest(req);
 
-        const workgroup = await prisma.workgroups.findFirst({ where: { id: query.groupId } });
+        const workgroup = await getFirstWorkgroupById(query.groupId);
         if (!workgroup) throw new Error('Workgroup not found');
 
         if (workgroup.creator_id !== user.id) throw new Error('Non-admin user can\'t edit rights');
 
-        const updatedUser = await prisma.users.findFirst({ where: { id: query.userId } });
+        const updatedUser = await getUserById(query.userId);
         if (!updatedUser) throw new Error('User not found');
 
-        const response = await prisma.users_workgroups.updateMany({
-            where: {
-                user_id: updatedUser.id,
-                group_id: workgroup.id
-            },
-            data: {
-                update_right: !!query.update_right,
-            }
-        });
+        const response = await updateUsersWorkgroups(
+          {
+            user_id: updatedUser.id,
+            group_id: workgroup.id
+          },
+          {
+            update_right: !!query.update_right,
+          }
+        );
 
         res.json({success: true, response});
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
 };
+
 export const updateUserDeleteRightController = async (req: Request, res: Response) => {
         const validation = z.object({
         userId: z.string().nonempty(),
@@ -361,23 +348,23 @@ export const updateUserDeleteRightController = async (req: Request, res: Respons
 
         const user = await getUserFromRequest(req);
 
-        const workgroup = await prisma.workgroups.findFirst({ where: { id: query.groupId } });
+        const workgroup = await getWorkGroupByGroupId(query.groupId);
         if (!workgroup) throw new Error('Workgroup not found');
 
         if (workgroup.creator_id !== user.id) throw new Error('Non-admin user can\'t edit rights');
 
-        const updatedUser = await prisma.users.findFirst({ where: { id: query.userId } });
+        const updatedUser = await getUserById(query.userId);
         if (!updatedUser) throw new Error('User not found');
 
-        const response = await prisma.users_workgroups.updateMany({
-            where: {
-                user_id: updatedUser.id,
-                group_id: workgroup.id
-            },
-            data: {
-                delete_right: !!query.delete_right
-            }
-        });
+        const response = await updateUsersWorkgroups(
+          {
+            user_id: updatedUser.id,
+            group_id: workgroup.id
+          },
+          {
+            delete_right: !!query.delete_right
+          }
+        );
 
         res.json({success: true, response});
     } catch (error) {
@@ -390,19 +377,13 @@ export const leaveWorkgroupController = async (req: Request, res: Response) => {
         const user = await getUserFromRequest(req);
         const workgroupId = req.params.workgroupId;
 
-        const workgroup = await prisma.workgroups.findFirstOrThrow({
-            where: {
-                id: workgroupId
-            }
-        });
+        const workgroup = await getFirstWorkgroupById(workgroupId, true);
 
         if (workgroup.creator_id === user.id) throw new Error("You cannot leave a group that you created");
 
-        await prisma.users_workgroups.deleteMany({
-            where: {
-                user_id: user.id,
-                group_id: workgroup.id
-            }
+        await deleteManyUsersWorkgroups({
+          user_id: user.id,
+          group_id: workgroup.id
         });
 
         res.json({success: true});
