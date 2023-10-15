@@ -379,3 +379,30 @@ export const updateUserDeleteRightController = async (req: Request, res: Respons
         res.status(400).json({ error: error.message });
     }
 };
+
+export const leaveWorkgroupController = async (req: Request, res: Response) => {
+    try {
+        const user = await getUserFromRequest(req);
+        const workgroupId = req.params.workgroupId;
+
+        const workgroup = await prisma.workgroups.findFirstOrThrow({
+            where: {
+                id: workgroupId
+            }
+        });
+
+        if (workgroup.creator_id === user.id) throw new Error("You cannot leave a group that you created");
+
+        await prisma.users_workgroups.deleteMany({
+            where: {
+                user_id: user.id,
+                group_id: workgroup.id
+            }
+        });
+
+        res.json({success: true});
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+
+    }
+};
