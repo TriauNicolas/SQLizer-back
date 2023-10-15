@@ -1,6 +1,8 @@
 import prisma from "../core/prisma";
 import PasswordException from "../exceptions/password.exceptions";
 import { Users } from "../models/models";
+import { createUserWorkgroup } from "./usersWorkgroups.services";
+import { createWorkgroup } from "./workgroups.services";
 
 export const registerService = async (user: Users) => {
   try {
@@ -13,22 +15,14 @@ export const registerService = async (user: Users) => {
       },
     });
 
-    const prismaWorkgroup = await prisma.workgroups.create({
-      data: {
-        group_name: "Mes Projets",
-        creator_id: prismaUser.id,
-        private: true,
-      },
-    });
+    const prismaWorkgroup = await createWorkgroup("Mes Projets", prismaUser.id, true);
 
-    await prisma.users_workgroups.create({
-      data: {
-        user_id: prismaUser.id,
-        group_id: prismaWorkgroup.id,
-        create_right: true,
-        update_right: true,
-        delete_right: false,
-      },
+    await createUserWorkgroup({
+      user_id: prismaUser.id,
+      group_id: prismaWorkgroup.id,
+      create_right: true,
+      update_right: true,
+      delete_right: false,
     });
 
     return;
