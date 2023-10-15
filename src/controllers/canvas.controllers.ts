@@ -94,9 +94,14 @@ export const deleteTableController = async (
       }
     });
 
-    if (!tableIndex) throw new Error("Table does not exist");
+    if (tableIndex !== 0 && !tableIndex) throw new Error("Table does not exist");
 
-    database.relations.splice(tableIndex, 1);
+    database.tables.splice(tableIndex, 1);
+    const relationToDelete = database.relations.filter((relation: Relation) => relation.from.table === tableName || relation.to.table === tableName);
+    relationToDelete.forEach((relation: Relation) => {
+      const indexToSplice = database.relations.indexOf(relation);
+      database.relations.splice(indexToSplice, 1);
+    });
 
     await updateDatabaseStructure(room, JSON.stringify(database));
     io.in(room).emit("responseDeleteTable", { tableName });
