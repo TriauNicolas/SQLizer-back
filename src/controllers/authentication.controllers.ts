@@ -13,7 +13,7 @@ import {
 import { getFirstDatabaseByDatabaseId } from "../services/databases.services";
 import { getUserWorkgroupByUserIdAndWorkgroupId } from "../services/usersWorkgroups.services";
 import { getFirstDatabaseGroupByGroupId } from "../services/databasesGroups.services";
-import { getFirstWorkgroup } from "../services/workgroups.services";
+import { getFirstWorkgroupById } from "../services/workgroups.services";
 
 // const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
@@ -64,7 +64,7 @@ export async function canUserUpdateDatabase(
   try {
     const database = await getFirstDatabaseByDatabaseId(databaseId);
     const dbGroup = await getFirstDatabaseGroupByGroupId(database.group_id);
-    const workgroup = await getFirstWorkgroup(dbGroup.workgroup_id);
+    const workgroup = await getFirstWorkgroupById(dbGroup.workgroup_id);
     const userWorkgroup = await getUserWorkgroupByUserIdAndWorkgroupId(userId, workgroup.id, true);
     if (userWorkgroup.update_right) return true;
     return false;
