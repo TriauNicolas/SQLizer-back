@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "start": "docker compose up -d",
-    "stop": "docker compose down && rm -rf data",
+    "start": "docker-compose up -d",
+    "stop": "docker-compose down && rm -rf data",
     "db:start": "docker-compose up -d",
     "db:stop": "docker-compose down && rmdir /s /q data",
     "watch": "npx prisma db pull && npx prisma generate && nodemon --watch src ./src/index.ts --exec ts-node ./src/index.ts -L",
