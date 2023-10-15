@@ -8,4 +8,4 @@ chmod -R a+rwx ./postgres_data/
 apt-get update -y && apt-get install -y openssl
 
 npm run build
-npm run start
+node ./dist/index.js
