@@ -387,19 +387,6 @@ export const leaveWorkgroupController = async (req: Request, res: Response) => {
         });
 
         res.json({success: true});
-        // res.json({
-        //     success: true,
-        //     user: {
-        //         user_id: user.id,
-        //         first_name: user.first_name,
-        //         last_name: user.last_name,
-        //         email: user.email,
-        //         rights: {
-        //             create_right: !!query?.create_right,
-        //             update_right: !!query?.update_right,
-        //             delete_right: !!query?.delete_right
-        //         }
-        //     }});
     } catch (error) {
         res.status(400).json({ error: error.message });
 
