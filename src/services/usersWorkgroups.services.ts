@@ -21,6 +21,17 @@ export const getUserWorkgroupByUserId = async (user_id: string) => {
   });
 };
 
+export const getUserWorkgroupByGroupId = async (group_id: string) => {
+  return await prisma.users_workgroups.findMany({
+    where: {
+      group_id: group_id,
+    },
+    include: {
+      users: true,
+    },
+  });
+};
+
 export const getUserWorkgroupByUserIdAndWorkgroupId = async (userId: string, workgroupId: string, mustThrow = false) => {
   return mustThrow ? await prisma.users_workgroups.findFirstOrThrow( { where: { user_id: userId, group_id: workgroupId } } ) : await prisma.users_workgroups.findFirst( { where: { user_id: userId, group_id: workgroupId } } );
 };
