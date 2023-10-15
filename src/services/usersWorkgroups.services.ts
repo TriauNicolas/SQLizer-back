@@ -6,8 +6,8 @@ export const createUserWorkgroup = async (workgroup) => {
   });
 };
 
-export const updateUsersWorkgroups = async (workgroup) => {
-  return await prisma.users_workgroups.updateMany(workgroup);
+export const updateUsersWorkgroups = async (where, data) => {
+  return await prisma.users_workgroups.updateMany({ where, data });
 };
 
 export const getUserWorkgroupByUserId = async (user_id: string) => {

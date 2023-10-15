@@ -156,17 +156,17 @@ export const updateUserRightController = async (
 
     if (!updatedUser) throw new Error("User not found");
 
-    const response = await updateUsersWorkgroups({
-      where: {
+    const response = await updateUsersWorkgroups(
+      {
         user_id: updatedUser.id,
         group_id: workgroup.id,
       },
-      data: {
+      {
         create_right: !!query.rights.create_right,
         update_right: !!query.rights.update_right,
         delete_right: !!query.rights.delete_right,
       },
-    });
+    );
 
     res.json({ success: true, response });
   } catch (error) {
