@@ -12,7 +12,7 @@ services:
     ports:
       - 6543:5432
     networks:
-      - app_network
+      - app-network
 
   api:
     image: node:lts
@@ -26,7 +26,7 @@ services:
       - ${PORT}:${PORT}
     env_file: .env
     networks:
-      - app_network
+      - app-network
     logging:
       driver: "json-file"
       options:
