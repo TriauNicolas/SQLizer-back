@@ -261,8 +261,6 @@ export const userJoinRoomController = async (
 ) => {
   const database = await canvasGetDatabaseController(room);
   socket.emit("responseGetDatabase", database);
-  console.log(database);
-  console.log(typeof database);
   socket.broadcast
     .to(room)
     .emit("userJoinRoom", {
