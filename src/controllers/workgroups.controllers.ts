@@ -91,6 +91,7 @@ export const addUserToWorkgroupController = async (req: Request, res: Response) 
         res.json({
             success: true,
             user: {
+                user_id: user.id,
                 first_name: user.first_name,
                 last_name: user.last_name,
                 email: user.email,
@@ -228,7 +229,6 @@ export const getWorkgroupsDatasController = async (req: Request, res: Response) 
         const response = [];
 
         for (const workgroup of userWorkgroups) {
-            console.log(workgroup);
             const formatedData: {group_name: string; group_id: string; is_admin: boolean, rights: { create_right: boolean; update_right: boolean; delete_right: boolean }, users?: { first_name: string; last_name: string; email: string; rights: { create_right: boolean; update_right: boolean; delete_right: boolean; } }[] } = {
                 group_name: workgroup.workgroups.group_name,
                 is_admin: user.id === workgroup.workgroups.creator_id,
@@ -278,7 +278,7 @@ export const getWorkgroupsDatasController = async (req: Request, res: Response) 
 };
 
 export const updateUserCreateRightController = async (req: Request, res: Response) => {
-        const validation = z.object({
+    const validation = z.object({
         userId: z.string().nonempty(),
         groupId: z.string().nonempty(),
         create_right: z.boolean(),
@@ -385,7 +385,6 @@ export const leaveWorkgroupController = async (req: Request, res: Response) => {
     try {
         const user = await getUserFromRequest(req);
         const workgroupId = req.params.workgroupId;
-
         const workgroup = await prisma.workgroups.findFirstOrThrow({
             where: {
                 id: workgroupId
