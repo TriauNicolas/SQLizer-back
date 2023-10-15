@@ -6,8 +6,9 @@ export interface Databases {
   updated_at?: Date;
   delete_interval?: bigint;
   delete_date?: Date;
-  structure?: Record<string, any>;
+  structure?: JSONdatabase;
   is_public: boolean;
+  group_id?: string;
 }
 
 export interface DatabasesGroups {
@@ -19,10 +20,10 @@ export interface DatabasesGroups {
 
 export interface Users {
   id?: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  password: string;
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+  password?: string;
   image_url?: string;
   created_at?: Date;
   users_workgroups?: UsersWorkgroups[];
@@ -51,8 +52,8 @@ export interface Workgroups {
 
 export interface JSONdatabase {
   dbName: string;
-  tables: Table[];
-  relations: Relation[];
+  tables?: Table[];
+  relations?: Relation[];
 }
 
 export type Table = {
@@ -67,7 +68,6 @@ export type Field = {
   type: string;
   autoincrement: boolean;
   pk: boolean;
-  fk: boolean;
   nullable: boolean;
   defaultValue?: string;
 };
@@ -84,4 +84,3 @@ export type JsonValue =
 | null
 | { [property: string]: JSON }
 | JSON[];
-

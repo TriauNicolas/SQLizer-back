@@ -7,6 +7,8 @@
     "build": "tsc",
     "start": "docker-compose up -d",
     "stop": "docker-compose down && rm -rf data",
+    "db:start": "docker-compose up -d",
+    "db:stop": "docker-compose down && rmdir /s /q data",
     "watch": "npx prisma db pull && npx prisma generate && nodemon --watch src ./src/index.ts --exec ts-node ./src/index.ts -L",
     "linter": "npx eslint .",
     "prisma:pull": "prisma db pull"
@@ -23,6 +25,7 @@
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.0",
     "nodemailer": "^6.9.3",
+    "socket.io": "^4.7.2",
     "zod": "^3.21.4"
   },
   "devDependencies": {
