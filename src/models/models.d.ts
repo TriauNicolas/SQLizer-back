@@ -8,6 +8,7 @@ export interface Databases {
   delete_date?: Date;
   structure?: JSONdatabase;
   is_public: boolean;
+  group_id?: string;
 }
 
 export interface DatabasesGroups {
@@ -19,10 +20,10 @@ export interface DatabasesGroups {
 
 export interface Users {
   id?: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  password: string;
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+  password?: string;
   image_url?: string;
   created_at?: Date;
   users_workgroups?: UsersWorkgroups[];
