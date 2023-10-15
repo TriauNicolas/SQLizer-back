@@ -275,3 +275,107 @@ export const getWorkgroupsDatasController = async (req: Request, res: Response) 
         res.status(400).json({ error: error.message });
     }
 };
+
+export const updateUserCreateRightController = async (req: Request, res: Response) => {
+        const validation = z.object({
+        userId: z.string().nonempty(),
+        groupId: z.string().nonempty(),
+        create_right: z.boolean(),
+    });
+    try {
+        const query = validation.parse(req.body);
+
+        const user = await getUserFromRequest(req);
+
+        const workgroup = await prisma.workgroups.findFirst({ where: { id: query.groupId } });
+        if (!workgroup) throw new Error('Workgroup not found');
+
+        if (workgroup.creator_id !== user.id) throw new Error('Non-admin user can\'t edit rights');
+
+        const updatedUser = await prisma.users.findFirst({ where: { id: query.userId } });
+        if (!updatedUser) throw new Error('User not found');
+
+        const response = await prisma.users_workgroups.updateMany({
+            where: {
+                user_id: updatedUser.id,
+                group_id: workgroup.id
+            },
+            data: {
+                create_right: !!query.create_right,
+            }
+        });
+
+        res.json({success: true, response});
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+export const updateUserUpdateRightController = async (req: Request, res: Response) => {
+        const validation = z.object({
+        userId: z.string().nonempty(),
+        groupId: z.string().nonempty(),
+        update_right: z.boolean(),
+    });
+    try {
+        const query = validation.parse(req.body);
+
+        const user = await getUserFromRequest(req);
+
+        const workgroup = await prisma.workgroups.findFirst({ where: { id: query.groupId } });
+        if (!workgroup) throw new Error('Workgroup not found');
+
+        if (workgroup.creator_id !== user.id) throw new Error('Non-admin user can\'t edit rights');
+
+        const updatedUser = await prisma.users.findFirst({ where: { id: query.userId } });
+        if (!updatedUser) throw new Error('User not found');
+
+        const response = await prisma.users_workgroups.updateMany({
+            where: {
+                user_id: updatedUser.id,
+                group_id: workgroup.id
+            },
+            data: {
+                update_right: !!query.update_right,
+            }
+        });
+
+        res.json({success: true, response});
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+export const updateUserDeleteRightController = async (req: Request, res: Response) => {
+        const validation = z.object({
+        userId: z.string().nonempty(),
+        groupId: z.string().nonempty(),
+        delete_right: z.boolean()
+    });
+    try {
+        const query = validation.parse(req.body);
+
+        const user = await getUserFromRequest(req);
+
+        const workgroup = await prisma.workgroups.findFirst({ where: { id: query.groupId } });
+        if (!workgroup) throw new Error('Workgroup not found');
+
+        if (workgroup.creator_id !== user.id) throw new Error('Non-admin user can\'t edit rights');
+
+        const updatedUser = await prisma.users.findFirst({ where: { id: query.userId } });
+        if (!updatedUser) throw new Error('User not found');
+
+        const response = await prisma.users_workgroups.updateMany({
+            where: {
+                user_id: updatedUser.id,
+                group_id: workgroup.id
+            },
+            data: {
+                delete_right: !!query.delete_right
+            }
+        });
+
+        res.json({success: true, response});
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
